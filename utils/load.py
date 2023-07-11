@@ -62,7 +62,7 @@ def load_phase_diagram_H2O():
     for dir_ in dirs:
         #if "iter" in dir_:
             #print("in dir")
-        s = dpdata.System(dir_,type_map=["O","H"],fmt="deepmd/npy")
+        s = dpdata.LabeledSystem(dir_,type_map=["O","H"],fmt="deepmd/npy")
         all_systems.append(s)
         
     frames = []
