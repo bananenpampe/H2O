@@ -15,7 +15,7 @@ def find_file_in_dirs(root_dir, filename):
 
 
 
-def load_PBE0_TS(which="lw_pmd"):
+def load_PBE0_TS(which="lw_pimd"):
 
     """
     load the PBE0 TS data from the deepmd-npy format
