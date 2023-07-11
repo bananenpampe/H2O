@@ -1,0 +1,4 @@
+requests
+dpdata
+numpy 
+ase
