@@ -8,17 +8,25 @@ class EquistoreLazyTorchApply(torch.nn.Module):
     and makes it compatible such that a TensorMap can be passed as input
     """
 
-    def __init__(self, module: torch.nn.Module, n_out: int):
+    def __init__(self, 
+                 module: torch.nn.Module, 
+                 n_out: int,
+                 property_str: str = "property"):
+        
         super().__init__()
     
         self.m = module
         self.n_out = n_out
         self.m_map = torch.nn.ModuleDict({})
+        self.property_str = property_str
     
     def initialize_weights(self, input: equistore.TensorMap):
         
-        for key, map in input.items():
-            x = map.values
+        for key, block in input.items():
+            
+            assert block.components == [], "components are not supported yet"
+
+            x = block.values
             key = l_to_str(key)
             self.m_map[key] = self.m(x.shape[1], self.n_out)
     
@@ -34,7 +42,8 @@ class EquistoreLazyTorchApply(torch.nn.Module):
             out_samples = block.samples
 
             out_blocks.append(equistore.TensorBlock(values=out_values, 
-                                              properties=equistore.Labels.range("property", out_values.shape[-1]), 
+                                              properties=equistore.Labels.range(self.property_str, 
+                                              out_values.shape[-1]), 
                                               components=[], 
                                               samples=out_samples))
 

@@ -83,7 +83,46 @@ class TestEquistore(unittest.TestCase):
         # this should fail, as the input dimensionality is changed to 10
         with self.assertRaises(RuntimeError):
             X = layer(X)
-        
+    
+    def test_forward_pass_more_samples_forward(self):
+        frames = ase.io.read(PATH_TEST_DATA, index=":")
+
+        frames_t = [rascaline_torch.as_torch_system(frame) for frame in frames]
+        calc = rascaline_torch.Calculator(rascaline.SoapPowerSpectrum(**hypers_sr))
+
+        X = calc(frames_t)
+        layer = EquistoreLinearLazy(n_out=10)
+        layer.initialize_weights(X)
+
+        X = equistore.join([X,X],axis="samples")
+        X = layer(X)
+
+    def test_forward_pass_different_blocks(self):
+        frames = ase.io.read(PATH_TEST_DATA, index=":")
+
+        frames_t = [rascaline_torch.as_torch_system(frame) for frame in frames]
+        calc = rascaline_torch.Calculator(rascaline.SoapPowerSpectrum(**hypers_sr))
+
+        X = calc(frames_t)
+
+        layer = EquistoreLinearLazy(n_out=10)
+        layer.initialize_weights(X)
+
+        for frame in frames_t:
+            X_int = calc(frames_t)
+            X_int = layer(X_int)
+    
+    def test_w_components(self):
+        frames = ase.io.read(PATH_TEST_DATA, index=":")
+
+        frames_t = [rascaline_torch.as_torch_system(frame) for frame in frames]
+        calc = rascaline_torch.Calculator(rascaline.SphericalExpansion(**hypers_sr))
+
+        X = calc(frames_t)
+
+        with self.assertRaises(AssertionError):
+            layer = EquistoreLinearLazy(n_out=10)
+            layer.initialize_weights(X)
 
 
 if __name__ == '__main__':
