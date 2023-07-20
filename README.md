@@ -22,3 +22,15 @@ ase_frames = load_phase_diagram_H2O()
 
 ```
 
+Train the model:
+
+An example code for training with energies and forces
+with a pytorch Lightning module, is provided in the example directory
+
+For this simply run:
+
+```
+
+python example/training.py
+
+```

@@ -17,7 +17,8 @@ import rascaline
 from nn.linear import EquistoreLinearLazy
 
 
-PATH_TEST_DATA = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_data", "xtb_frames_for_testing.xyz")
+PATH_TEST_DATA = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                              "test_data", "xtb_frames_for_testing.xyz")
 
 hypers_sr = {
     "cutoff": 3.0,
