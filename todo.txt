@@ -1,0 +1,12 @@
+Do not forget:
+
+1st check the convention of the position gradients and forces (correct signs)
+-> look at convert.py and the ForceResponse class
+
+2nd check the type hints for torch modules
+
+3rd Implement Transformer that removes composition energy
+    and acts on TensorMap
+
+4th adapt the ase_to_tensormap for the extraction of the targets, 
+such that it actually comes in torch.Tensors and no conversion is necessary
