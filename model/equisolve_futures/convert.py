@@ -14,7 +14,6 @@ import ase
 import numpy as np
 from equistore import Labels, TensorBlock, TensorMap
 
-
 def ase_to_tensormap(
     frames: List[ase.Atoms],
     energy: str = None, 
@@ -56,7 +55,7 @@ def ase_to_tensormap(
         
 
     if stress is not None:
-        cell_gradients = [-f.arrays[stress] for f in frames]
+        cell_gradients = [-f.info[stress] for f in frames]
     else:
         try:
             cell_gradients = [-f.get_stress(voigt=False) for f in frames]

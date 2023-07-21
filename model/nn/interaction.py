@@ -6,6 +6,8 @@ import equistore
 from .linear import EquistoreLinearLazy
 from .nonlinear import EquistoreMLPLazy
 
+# Interaction layers 
+
 
 class Interaction(torch.nn.Module):
     #better to have an abstract class
@@ -34,7 +36,7 @@ class BPNNInteraction(torch.nn.Module):
     def __init__(self, n_out: int,
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
-                 activation: torch.nn.Module = torch.nn.Tanh):
+                 activation: torch.nn.module = torch.nn.Tanh):
         
         super().__init__()
         
