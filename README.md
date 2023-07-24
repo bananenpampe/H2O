@@ -2,6 +2,15 @@
 Various models learning the PES of H2O
 
 
+## Install
+
+To always install the CPU version, please use:
+
+```bash
+pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+```
+
+
 ## Get data
 
 Execute the prepare.py script, which will download data from the AISsquare database:

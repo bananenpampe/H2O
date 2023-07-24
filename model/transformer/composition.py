@@ -20,7 +20,6 @@ import numpy as np
 import equistore
 
 import torch
-import sklearn.linear_model
 
 #TODO: make an abstract class that defines common behaviours ie check_fitted etc.
 

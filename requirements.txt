@@ -5,6 +5,6 @@ requests
 torch
 pytorch-lightning
 
-git@github.com:Luthaf/rascaline-torch.git@master
-git+https://github.com/lab-cosmo/equistore
-git+https://github.com/Luthaf/rascaline.git
+#git@github.com:Luthaf/rascaline-torch.git@master
+#git+https://github.com/lab-cosmo/equistore
+#git+https://github.com/Luthaf/rascaline.git
