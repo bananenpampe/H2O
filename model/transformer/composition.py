@@ -18,7 +18,7 @@ import rascaline
 import rascaline_torch
 import numpy as np
 import equistore
-import equisolve
+
 import torch
 import sklearn.linear_model
 

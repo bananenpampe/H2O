@@ -28,7 +28,8 @@ class ForceRespone(UnitResponse):
         forces = grad(outputs=list(input.block(0).values),
                       inputs=[sys_i.positions for sys_i in systems],
                       grad_outputs=outputs,
-                      create_graph=self.training)
+                      create_graph=True,
+                      retain_graph=True)
         
         #print("hello")
 

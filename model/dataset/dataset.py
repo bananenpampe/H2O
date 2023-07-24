@@ -40,6 +40,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
 
 import ase
 import torch
@@ -91,7 +92,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         precompute: bool = False,
         on_disk: bool = False,
         lazy_fill_up: bool = True,
-        transforms: List[torch.nn.Module] = None,
+        transforms: List[torch.nn.Module] = [],
         memory_save: bool = False,
         energy_key: str = None,
         forces_key: str = None,
@@ -158,7 +159,9 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
         
         # TODO: make this more general
-        self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key) for frame in frames]
+        #self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key) for frame in frames]
+        self.properties = [equistore.to(ase_to_tensormap(frame, energy_key, forces_key, stress_key),"torch",dtype=torch.float64)
+                                         for frame in frames]
         
         
         for frame in frames:
@@ -325,7 +328,6 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                               Please set precompute to False")
 
 
-from .dataset_helpers import _detach_all_blocks
 
 def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.TensorMap, rascaline_torch.System]]):
     #TODO: add renumbering of the tensor maps, (idx)

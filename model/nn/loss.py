@@ -33,6 +33,24 @@ class EnergyForceLoss(torch.nn.Module):
         self.w_forces = w_forces
         self.energy_loss = torch.nn.MSELoss()
         self.force_loss = torch.nn.MSELoss()
+    
+    def report(self, input: equistore.TensorMap, targets: equistore.TensorMap) -> dict:
+
+        energy_pred = input.block(0).values
+        energy_target = torch.tensor(targets.block(0).values, dtype=torch.float64)
+
+        energy_mse = self.energy_loss(energy_pred, energy_target)
+        forces_mse = torch.tensor(0.0)
+
+        if self.w_forces:
+            forces_pred = input.block(0).gradient("positions").values
+            forces_target = torch.tensor(targets.block(0).gradient("positions").values, dtype=torch.float64)
+            forces_mse += self.force_loss(forces_pred.flatten(), forces_target.flatten())
+
+        energy_target.detach()
+
+        return energy_mse, forces_mse
+
 
     def forward(self, input: equistore.TensorMap, targets: equistore.TensorMap) -> torch.Tensor:
         
@@ -54,6 +72,5 @@ class EnergyForceLoss(torch.nn.Module):
         energy_target.detach()
 
         return loss
-
 
 
