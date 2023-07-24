@@ -19,6 +19,23 @@ class UnitFeatures(torch.nn.Module):
     def forward(self, inputs: equistore.TensorMap ):
         return inputs
 
+"""
+
+# could, in principle handle the densification
+
+class BPNNFeatures(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+    
+    #every module should have this "prototype" function
+    def initialize_weights(self, inputs: equistore.TensorMap):
+        pass
+
+    def forward(self, inputs: equistore.TensorMap ):
+        
+    # to keys_to_neighbours here
+        return inputs
+"""
 
 class DensifyFeatures(torch.nn.Module):
     def __init__(self):

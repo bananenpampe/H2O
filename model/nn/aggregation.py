@@ -7,11 +7,12 @@ from functools import partial
 
 class StructureWiseAggregation(torch.nn.Module):
     
-    def __init__(self,mode: str ="mean", sum_over: list = ["center"]):
+    def __init__(self,mode: str ="sum", sum_over: list = ["center"]):
 
         super().__init__()
 
         self.sum_over = sum_over
+        self.mode = mode
 
         if mode not in ["mean", "sum", "passthrough"]:
             raise NotImplementedError(f"mode {mode} not implemented")
@@ -34,7 +35,7 @@ class StructureWiseAggregation(torch.nn.Module):
 
 class BPNNStructureWiseAggregation(StructureWiseAggregation):
     
-    def __init__(self,mode: str ="mean"):
+    def __init__(self,mode: str ="sum"):
 
         super().__init__(mode=mode, sum_over=["species_center","center"])
     

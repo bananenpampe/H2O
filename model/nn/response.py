@@ -46,6 +46,7 @@ class ForceRespone(UnitResponse):
             ),
         )
 
+        #TODO: change to torch labels once move to rascaline.rascaline-torch
         positions_gradient = equistore.TensorBlock(
             values=gradient_values.reshape(-1, 3, 1),
             samples=position_gradient_samples,

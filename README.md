@@ -22,7 +22,7 @@ ase_frames = load_phase_diagram_H2O()
 
 ```
 
-Train the model:
+## Train a model:
 
 An example code for training with energies and forces
 with a pytorch Lightning module, is provided in the example directory
@@ -34,3 +34,20 @@ For this simply run:
 python example/training.py
 
 ```
+
+
+## Tests:
+
+Modules should be tested for their symmetry, and size consistent / size extensive properties.
+In case of the BPNN model, this will be outlined here:
+
+- Test for size extensivity
+- Test for size consitency (when considering average energies)
+- Test for strict seperatability - having two non interacting systems
+- Test for translational invariance
+- Test for rotational invariance
+- Test for invariance under listing-permutation of atoms
+
+Since we initialize models that are not trained the following requirements have to be checked:
+- predicted energies are nonzero
+- predicted energies react to ratteling -> so we do not just add up the structure wise bias of the outlayers

@@ -2,6 +2,12 @@ import torch
 import equistore
 from  .utils import l_to_str
 
+
+
+### There should be a GeneralTorchApply that accepts either a TensorMap or a dict of functions that 
+### can be applied during application (there should be a unit apply)
+# unit apply passes through
+
 class EquistoreLazyTorchApply(torch.nn.Module):
     """ Base class that sets up whatever torch.nn.Module 
     that takes as input a well-defined input and output dimension 

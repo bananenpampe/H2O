@@ -117,6 +117,11 @@ class CompositionTransformer(torch.nn.Module):
     def inverse_transform(self, systems, targets):
         self._check_fitted()
 
+
+        #TODO: overly complicated ?
+        # write a, get_offset function that inverse,
+        #  and forward and transform can call
+
         targets = targets.copy()
         feats = self._compute_feat(systems)
         pred = feats @ self.weights
