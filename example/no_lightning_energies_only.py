@@ -50,6 +50,7 @@ hypers_sr = {
 # --- define calculator ---
 calc_sr = rascaline.SoapPowerSpectrum(**hypers_sr)
 
+"""
 dataloader_setup = create_rascaline_dataloader(frames_train,
                                          calculators=calc_sr,#setup,
                                          do_gradients=False,
@@ -65,7 +66,7 @@ transformer.fit(syst, prop)
 
 del feat, prop, syst
 del dataloader_setup
-
+"""
 
 
 
