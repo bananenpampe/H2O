@@ -37,17 +37,15 @@ class EnergyForceLoss(torch.nn.Module):
     def report(self, input: equistore.TensorMap, targets: equistore.TensorMap) -> dict:
 
         energy_pred = input.block(0).values
-        energy_target = torch.tensor(targets.block(0).values, dtype=torch.float64)
+        energy_target = targets.block(0).values.type(torch.float64)
 
         energy_mse = self.energy_loss(energy_pred, energy_target)
         forces_mse = torch.tensor(0.0)
 
         if self.w_forces:
-            forces_pred = input.block(0).gradient("positions").values
-            forces_target = torch.tensor(targets.block(0).gradient("positions").values, dtype=torch.float64)
+            forces_pred = input.block(0).gradient("positions").values.type(torch.float64)
+            forces_target = targets.block(0).gradient("positions").values.type(torch.float64)
             forces_mse += self.force_loss(forces_pred.flatten(), forces_target.flatten())
-
-        energy_target.detach()
 
         return energy_mse, forces_mse
 
@@ -59,17 +57,15 @@ class EnergyForceLoss(torch.nn.Module):
         # write a equistoreLoss that takes two equistore.TensorMaps and computes the (mse) loss
         
         energy_pred = input.block(0).values
-        energy_target = torch.tensor(targets.block(0).values, dtype=torch.float64)
+        energy_target = targets.block(0).values.type(torch.float64)
 
         loss = self.energy_weight * self.energy_loss(energy_pred, energy_target) 
 
         if self.w_forces:
             forces_pred = input.block(0).gradient("positions").values
-            forces_target = torch.tensor(targets.block(0).gradient("positions").values, dtype=torch.float64)
+            forces_target = targets.block(0).gradient("positions").values.type(torch.float64)
 
             loss += self.force_weight * self.force_loss(forces_pred.flatten(), forces_target.flatten())
-
-        energy_target.detach()
 
         return loss
 

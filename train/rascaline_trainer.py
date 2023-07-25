@@ -30,7 +30,7 @@ class BPNNRascalineModule(pl.LightningModule):
 
         outputs = self(feats,systems)
         loss = self.loss_fn(outputs, properties)
-        print("computing loss")
+        #print("computing loss")
         self.log('train_loss', loss, enable_graph=True)
         return loss
     

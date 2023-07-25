@@ -8,6 +8,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 
 from pytorch_lightning import Trainer
 from rascaline_trainer import BPNNRascalineModule
+from nn.model import BPNNModel
+from nn.loss import EnergyForceLoss
 from load import load_PBE0_TS
 from dataset.dataset import create_rascaline_dataloader
 import rascaline
@@ -87,62 +89,61 @@ dataloader_val = create_rascaline_dataloader(frames_val,
 feat, prop, syst = next(iter(dataloader_train))
 
 # define the trainer
-module = BPNNRascalineModule(feat, transformer)#transformer)
+# module = BPNNRascalineModule(feat, transformer)#transformer)
 
 # --- train the model ---
-n = 10
-logger = CSVLogger("logs", name="my_exp_name")
-
-
-trainer = Trainer(max_epochs=n,
-                  precision=64,
-                  accelerator="cpu",
-                  inference_mode=False,
-                  num_sanity_val_steps=0,
-                  logger=logger,
-                  log_every_n_steps=50)
 
 # create an empty text file and write losses to it later
 
-with open("losses.txt", "w") as f:
-    # write a losses header to file
-    f.write("epoch, energy_mse, force_mse")
+model = BPNNModel()
+model.initialize_weights(feat)
 
+n = 10
 
-for i in range(1):
+optimizer = torch.optim.LBFGS(model.parameters(), lr=1.)
+loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.95)
 
-    print("epoch: ", i)
-    trainer.fit(module, dataloader_train)
-
-    with torch.enable_grad():
-        feat, prop, syst = next(iter(dataloader_val))
-        out = module.forward(feat, syst)
-
-        # this gives us (prediction on offset removed)
-
-    with torch.no_grad():
+for epoch in range(n):
+    
+    
+    for (feat, prop, syst) in dataloader_train:
         
+        model.train()
+        
+        prop = transformer.transform(syst, prop)
+
+        def closure():
+            
+            optimizer.zero_grad()
+            out = model.forward(feat, syst)
+            loss = loss_fn(out, prop)
+            loss.backward(retain_graph=True)
+            
+            return loss
+        
+        optimizer.step(closure)
+
+    
+    for (feat, prop, syst) in dataloader_val:
+
+        model.eval()
+
+        out = model.forward(feat, syst)
+
+        print(out.block(0).values)
+        print(transformer.transform(syst, prop).block(0).values)
+
         out = transformer.inverse_transform(syst, out)
-        energy_mse, force_mse = module.loss_fn.report(out, prop)
 
-    print("energy_mse: ", energy_mse)
-    print("force_mse: ", force_mse)
-
-    #write losses to file, scv style
-    with open("losses.txt", "a") as f:
-        f.write(f"\n{i}, {float(energy_mse)}, {float(force_mse)}")
-
-
-    trainer = Trainer(max_epochs=n,
-                      precision=64,
-                      accelerator="cpu",
-                      inference_mode=False,
-                      num_sanity_val_steps=0,
-                      logger=logger,
-                      log_every_n_steps=50)
+        mse_energy = torch.nn.functional.mse_loss(out.block(0).values, prop.block(0).values)
+        mse_force = torch.nn.functional.mse_loss(out.block(0).gradient("positions").values,
+                                                 prop.block(0).gradient("positions").values)
+        
+        print(prop.block(0).values.std())
+        
+        print("mse_energy: ", float(mse_energy))
+        print("mse_force: ",float(mse_force))
+        print("%rmse energy: ", float(torch.sqrt(mse_energy))/float(prop.block(0).values.std()))
+        print("%rmse force: ", float(torch.sqrt(mse_energy))/float(prop.block(0).gradient("positions").values.std()))
 
 
-#trainer.validate(module, dataloader_val)
-
-#trainer.validate(module)
-#trainer.test(dataloader_test)
