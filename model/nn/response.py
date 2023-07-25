@@ -25,7 +25,7 @@ class ForceRespone(UnitResponse):
 
         outputs = list(torch.ones_like(input.block(0).values))
 
-        forces = grad(outputs=list(input.block(0).values),
+        dEdx = grad(outputs=list(input.block(0).values),
                       inputs=[sys_i.positions for sys_i in systems],
                       grad_outputs=outputs,
                       create_graph=True,
@@ -34,7 +34,7 @@ class ForceRespone(UnitResponse):
         #print("hello")
 
         #negative forces, are position gradients
-        gradient_values = -torch.vstack(forces)
+        gradient_values = torch.vstack(dEdx)
 
         position_gradient_samples = equistore.Labels(
             ["sample", "structure", "atom"],
@@ -42,7 +42,7 @@ class ForceRespone(UnitResponse):
                 [
                     [s, s, a]
                     for s in range(len(systems))
-                    for a in range(len(forces[s]))
+                    for a in range(len(dEdx[s]))
                 ]
             ),
         )
