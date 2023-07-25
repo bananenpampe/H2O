@@ -10,6 +10,7 @@ To always install the CPU version, please use:
 pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 ```
 
+Do the same for the rascaline-torch install
 
 ## Get data
 
