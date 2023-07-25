@@ -1,3 +1,4 @@
+import random
 import sys
 import os
 
@@ -18,31 +19,18 @@ import equistore
 torch.set_default_dtype(torch.float64)
 
 # --- load the data ---
-frames_water = load_PBE0_TS()[:150]
-frames_train = frames_water[:100]
-frames_val = frames_water[100:150]
-frames_test = frames_water[20:30]
+frames_water = load_PBE0_TS()
+random.shuffle(frames_water)
+
+frames_water = frames_water[:300]
+frames_train = frames_water[:250]
+frames_val = frames_water[250:]
 
 # --- define the hypers ---
 hypers_sr = {
-    "cutoff": 3.0,
+    "cutoff": 5.0,
     "max_radial": 5,
-    "max_angular": 3,
-    "atomic_gaussian_width": 0.3,
-    "center_atom_weight": 1.0,
-    "radial_basis": {
-        "Gto": {},
-    },
-    "cutoff_function": {
-        "ShiftedCosine": {"width":0.5},
-    },
-    "radial_scaling":{"Willatt2018": {"exponent": 3.0, "rate": 1.5, "scale": 2.0}}
-}
-
-hypers_setup = {
-    "cutoff": 3.0,
-    "max_radial": 2,
-    "max_angular": 2,
+    "max_angular": 5,
     "atomic_gaussian_width": 0.3,
     "center_atom_weight": 1.0,
     "radial_basis": {
@@ -56,8 +44,6 @@ hypers_setup = {
 
 # --- define calculator ---
 calc_sr = rascaline.SoapPowerSpectrum(**hypers_sr)
-calc_setup = rascaline.SoapPowerSpectrum(**hypers_setup)
-
 
 dataloader_setup = create_rascaline_dataloader(frames_train,
                                          calculators=calc_sr,#setup,
@@ -74,7 +60,6 @@ transformer.fit(syst, prop)
 
 del feat, prop, syst
 del dataloader_setup
-del calc_setup
 
 
 # --- create the dataloaders ---
@@ -83,7 +68,7 @@ dataloader_train = create_rascaline_dataloader(frames_train,
                                          do_gradients=True,
                                          precompute = True,
                                          lazy_fill_up = False,
-                                         batch_size=2, 
+                                         batch_size=len(frames_train), 
                                          shuffle=False)
 
 dataloader_val = create_rascaline_dataloader(frames_val,
@@ -93,15 +78,6 @@ dataloader_val = create_rascaline_dataloader(frames_val,
                                          lazy_fill_up = False,
                                          batch_size=len(frames_val), 
                                          shuffle=False)
-
-dataloader_test = create_rascaline_dataloader(frames_test,
-                                         calculators=calc_sr,
-                                         do_gradients=True,
-                                         precompute = True,
-                                         lazy_fill_up = False,
-                                         batch_size=len(frames_test), 
-                                         shuffle=False)
-
 
 # --- create the trainer ---
 # for now a batch of features is necessary 
@@ -113,7 +89,7 @@ feat, prop, syst = next(iter(dataloader_train))
 module = BPNNRascalineModule(feat, transformer)#transformer)
 
 # --- train the model ---
-n = 5
+n = 10
 
 trainer = Trainer(max_epochs=n, precision=64, accelerator="cpu", inference_mode=False,num_sanity_val_steps=0)
 
@@ -122,7 +98,6 @@ trainer = Trainer(max_epochs=n, precision=64, accelerator="cpu", inference_mode=
 with open("losses.txt", "w") as f:
     # write a losses header to file
     f.write("epoch, energy_mse, force_mse")
-
 
 
 for i in range(25):
@@ -144,8 +119,7 @@ for i in range(25):
 
     #write losses to file, scv style
     with open("losses.txt", "a") as f:
-        f.write("\n")
-        f.write(str(i) + ", " + str(energy_mse) + ", " + str(force_mse))
+        f.write(f"\n{i}, {float(energy_mse)}, {float(force_mse)}")
 
 
     trainer = Trainer(max_epochs=n, precision=64, accelerator="cpu", inference_mode=False, num_sanity_val_steps=0)
