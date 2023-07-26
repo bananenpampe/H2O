@@ -13,6 +13,8 @@ from typing import List
 import ase
 import numpy as np
 from equistore import Labels, TensorBlock, TensorMap
+import torch
+
 
 def ase_to_tensormap(
     frames: List[ase.Atoms],
@@ -40,29 +42,26 @@ def ase_to_tensormap(
         frames = [frames]
 
     if energy is not None:
-        values = [f.info[energy] for f in frames]
+        values = [torch.tensor(f.info[energy]) for f in frames]
     else:
         energy="energy"
-        values = [f.get_potential_energy() for f in frames]
+        values = [torch.tensor(f.get_potential_energy()) for f in frames]
 
     if forces is not None:
-        positions_gradients = [-f.arrays[forces] for f in frames]
+        positions_gradients = [-torch.tensor(f.arrays[forces]) for f in frames]
     else:
         try:
-            positions_gradients = [-f.get_forces() for f in frames]
+            positions_gradients = [-torch.tensor(f.get_forces()) for f in frames]
         except ase.ase.calculators.calculator.PropertyNotImplementedError:
-            positions_gradients = None
+            cell_gradients = None
         
 
     if stress is not None:
-        cell_gradients = [-f.info[stress] for f in frames]
+        cell_gradients = [-torch.tensor(f.arrays[stress]) for f in frames]
     else:
-        if all([f.get_calculator() is not None for f in frames]):
-            try:
-                cell_gradients = [-f.get_stress(voigt=False) for f in frames]
-            except ase.ase.calculators.calculator.PropertyNotImplementedError:
-                cell_gradients = None
-        else:
+        try:
+            cell_gradients = [-torch.tensor(f.get_stress(voigt=False)) for f in frames]
+        except ase.ase.calculators.calculator.PropertyNotImplementedError:
             cell_gradients = None
 
     return properties_to_tensormap(values, positions_gradients, cell_gradients, property_name=energy)
@@ -110,7 +109,7 @@ def properties_to_tensormap(
     n_structures = len(values)
 
     block = TensorBlock(
-        values=np.asarray(values).reshape(-1, 1),
+        values=torch.tensor(values).reshape(-1, 1),
         samples=Labels(["structure"], np.arange(n_structures).reshape(-1, 1)),
         components=[],
         properties=Labels([property_name], np.array([(0,)])),
@@ -123,7 +122,7 @@ def properties_to_tensormap(
                 f"{len(positions_gradients)} positions_gradients values"
             )
 
-        gradient_values = np.concatenate(positions_gradients, axis=0)
+        gradient_values = torch.vstack(positions_gradients)
 
         if gradient_values.shape[1] != 3:
             raise ValueError(
@@ -159,8 +158,8 @@ def properties_to_tensormap(
                 f"given {n_structures} values but "
                 f"{len(cell_gradients)} cell_gradients values"
             )
-
-        gradient_values = np.asarray(cell_gradients)
+        
+        gradient_values = torch.stack(cell_gradients, dim=0)
 
         if gradient_values.shape[1:] != (3, 3):
             raise ValueError(

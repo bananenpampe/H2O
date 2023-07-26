@@ -76,10 +76,11 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         perm = combinations_with_replacement(global_species,2)
         pairs = np.array(list(perm)).reshape(-1,2)
         pairs_comb = equistore.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
-
+        
+        feat = [f.keys_to_samples("species_center") for f in feat]
         feat = [f.keys_to_properties(pairs_comb) for f in feat]
 
-        return equistore.join(feat,axis="properties")  
+        return feat[0] #equistore.join(feat,axis="properties")  
 
     
     def __init__(
@@ -116,6 +117,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         if do_cell_gradients:
             assert do_gradients is True
         
+            
         """
 
         assert len(frames) > 0
@@ -342,6 +344,29 @@ def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.Ten
     return equistore.join(feats, axis="samples"), equistore.join(properties, axis="samples"), systems
 
 
+def _equistore_collate_w_custom_idx(tensor_maps: List[Tuple[equistore.TensorMap,equistore.TensorMap, rascaline_torch.System]]):
+
+
+
+    idx = [n*torch.ones(len(tensor_map[0].block(0).values),dtype=int) for n, tensor_map in enumerate(tensor_maps)]
+    feats = [tensor_map[0].block(0).values for tensor_map in tensor_maps]
+    energies = [tensor_map[1].block(0).values for tensor_map in tensor_maps]
+    forces = [-tensor_map[1].block(0).gradient("positions").values for tensor_map in tensor_maps]
+    #for tensor_map in tensor_maps: tensor_map[2].positions.detach()
+    systems = [tensor_map[2] for tensor_map in tensor_maps]
+
+    feats = torch.vstack(feats) 
+    energies = torch.vstack(energies)
+    forces = torch.vstack(forces)
+    idx = torch.hstack(idx)
+
+    return feats, energies, forces, idx, systems
+
+
+
+
+
+
 def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
     calculators: Union[rascaline.calculators.CalculatorBase,List[rascaline.calculators.CalculatorBase]],
@@ -365,6 +390,9 @@ def create_rascaline_dataloader(
     sampler = None,
     batch_sampler = None,
     dataset_kwargs = None,
+    energy_key: str = None,
+    forces_key: str = None,
+    stress_key: str = None,
     **kwargs,
     ):
     """creates a rascaline dataloader
@@ -377,13 +405,16 @@ def create_rascaline_dataloader(
         lazy_fill_up,
         transforms,
         memory_save,
+        energy_key=energy_key,
+        forces_key=forces_key,
+        stress_key=stress_key,
     )
 
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=shuffle,
-        collate_fn=_equistore_collate,
+        collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin_memory,
         drop_last=drop_last,
@@ -395,6 +426,7 @@ def create_rascaline_dataloader(
         persistent_workers=persistent_workers,
         sampler=sampler,
         batch_sampler=batch_sampler,
+
         **kwargs,
     )
 
