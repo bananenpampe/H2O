@@ -1,0 +1,1 @@
+{"cutoff": 7.0, "max_radial": 6, "max_angular": 5, "atomic_gaussian_width": 0.3, "center_atom_weight": 1.0, "radial_basis": {"Gto": {}}, "cutoff_function": {"ShiftedCosine": {"width": 0.5}}, "radial_scaling": {"Willatt2018": {"exponent": 3.0, "rate": 1.5, "scale": 2.0}}}
