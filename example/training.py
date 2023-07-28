@@ -10,13 +10,17 @@ from rascaline_trainer import BPNNRascalineModule
 from load import load_PBE0_TS
 from dataset.dataset import create_rascaline_dataloader
 import rascaline
+import rascaline.torch
 import torch
+import ase.io
+
+from transformer.composition import CompositionTransformer
 
 #default type is float64
 torch.set_default_dtype(torch.float64)
 
 # --- load the data ---
-frames_water = load_PBE0_TS()[:100]
+frames_water = ase.io.read("../data/water_converted.xyz", index=":")[:50]
 
 # --- define the hypers ---
 hypers_sr = {
@@ -35,10 +39,12 @@ hypers_sr = {
 }
 
 # --- define calculator ---
-calc_sr = rascaline.SoapPowerSpectrum(**hypers_sr)
+calc_sr = rascaline.torch.SoapPowerSpectrum(**hypers_sr)
 
 # --- create the dataloader ---
 dataloader = create_rascaline_dataloader(frames_water,
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
                                          calculators=calc_sr,
                                          do_gradients=True,
                                          precompute = True,
@@ -52,9 +58,12 @@ dataloader = create_rascaline_dataloader(frames_water,
 
 feat, prop, syst = next(iter(dataloader))
 
+transformer_e = CompositionTransformer()
+transformer_e.fit(syst, prop)
+
 # define the trainer
-module = BPNNRascalineModule(feat)
+module = BPNNRascalineModule(feat, transformer_e)
 
 # --- train the model ---
-trainer = Trainer(max_epochs=5, precision=64)
-trainer.fit(module, dataloader)
+trainer = Trainer(max_epochs=5, precision=64, accelerator="cpu")
+trainer.fit(module, dataloader, )

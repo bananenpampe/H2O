@@ -5,6 +5,12 @@ import torch
 import equistore
 from functools import partial
 
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equistore_torch_operations_futures"))
+
+from reduce_over_samples import sum_over_samples, mean_over_samples
 class StructureWiseAggregation(torch.nn.Module):
     
     def __init__(self,mode: str ="sum", sum_over: list = ["center"]):
@@ -18,10 +24,10 @@ class StructureWiseAggregation(torch.nn.Module):
             raise NotImplementedError(f"mode {mode} not implemented")
 
         if mode == "mean":
-            self.aggregation_fn = partial(equistore.mean_over_samples,sample_names=self.sum_over)
+            self.aggregation_fn = partial(mean_over_samples,sample_names=self.sum_over)
         
         elif mode == "sum":
-            self.aggregation_fn = partial(equistore.sum_over_samples,sample_names=self.sum_over)
+            self.aggregation_fn = partial(sum_over_samples,sample_names=self.sum_over)
         
         elif mode == "passthrough":
             self.aggregation_fn = lambda x: x

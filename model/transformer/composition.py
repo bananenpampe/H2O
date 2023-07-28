@@ -15,12 +15,21 @@
 # has to have a is_global attribute
 
 import rascaline
-import rascaline_torch
+import rascaline.torch
 import numpy as np
 import equistore
 
+from equistore.torch import TensorMap, TensorBlock
+
 import torch
 import sklearn.linear_model
+
+import sys 
+import os
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equistore_torch_operations_futures"))
+
+from reduce_over_samples import sum_over_samples, mean_over_samples
 
 #TODO: make an abstract class that defines common behaviours ie check_fitted etc.
 
@@ -36,9 +45,8 @@ class CompositionTransformer(torch.nn.Module):
 
         self.is_global = True
         
-        self.calc = rascaline_torch.Calculator(
-                                rascaline.AtomicComposition(per_structure=False)
-                                )
+        self.calc = rascaline.torch.AtomicComposition(per_structure=False)
+
         self.bias = bias
         self.is_fitted = False
         self.weights = None
@@ -50,7 +58,7 @@ class CompositionTransformer(torch.nn.Module):
     
     def _compute_feat(self, systems):
         feats = self.calc(systems)
-        feats = equistore.sum_over_samples(feats, "center")
+        feats = sum_over_samples(feats, "center")
         feats = feats.keys_to_properties("species_center")
         feats = feats.block(0).values
 
@@ -69,6 +77,8 @@ class CompositionTransformer(torch.nn.Module):
         # feats have shape (n_samples, n_features)
         # targets have shape (n_samples, 1)
 
+        print(targets)
+
         targets = targets.block(0).values
         targets = torch.clone(targets.reshape(-1,1))
         feats = torch.clone(feats)
@@ -79,6 +89,8 @@ class CompositionTransformer(torch.nn.Module):
         return weights
 
     def forward(self, systems, targets):
+
+        assert self.weights.requires_grad == False
 
         targets = targets.copy()
         self._check_fitted()
@@ -91,6 +103,8 @@ class CompositionTransformer(torch.nn.Module):
 
     def transform(self, systems, targets):
 
+        #assert self.weights.requires_grad == False
+
         targets = targets.copy()
         self._check_fitted()
 
@@ -100,22 +114,25 @@ class CompositionTransformer(torch.nn.Module):
         target_values = targets.block(0).values
         target_values -= pred
 
-        out_block = equistore.TensorBlock(values=target_values, 
+        out_block = TensorBlock(values=target_values, 
                                           properties=targets.block(0).properties,
                                           components=targets.block(0).components,
                                           samples=targets.block(0).samples)
 
 
 
-        for gradient_key, gradient in targets.block(0).gradients():
+        for gradient_key in targets.block(0).gradients():
+            gradient =  targets.block(0).gradient(gradient_key)
             out_block.add_gradient(gradient_key, gradient.copy())
 
-        out_map = equistore.TensorMap(targets.keys, [out_block])
+        out_map = TensorMap(targets.keys, [out_block])
 
         return out_map
     
     def inverse_transform(self, systems, targets):
         self._check_fitted()
+
+        #assert self.weights.requires_grad == False
 
 
         #TODO: overly complicated ?
@@ -129,7 +146,7 @@ class CompositionTransformer(torch.nn.Module):
         target_values = targets.block(0).values
         target_values += pred
 
-        out_block = equistore.TensorBlock(values=target_values, 
+        out_block = TensorBlock(values=target_values, 
                                           properties=targets.block(0).properties,
                                           components=targets.block(0).components,
                                           samples=targets.block(0).samples)
@@ -139,7 +156,7 @@ class CompositionTransformer(torch.nn.Module):
         for gradient_key, gradient in targets.block(0).gradients():
             out_block.add_gradient(gradient_key, gradient.copy())
 
-        out_map = equistore.TensorMap(targets.keys, [out_block])
+        out_map = TensorMap(targets.keys, [out_block])
 
         return out_map
 
@@ -149,6 +166,7 @@ class CompositionTransformer(torch.nn.Module):
         #solve a least squares problem using torch tensors
         feats = self._compute_feat(systems)
         self.weights = self._solve_weights(feats, targets)
+        #self.weights.requires_grad = False
         # do we have a bias ? -> concatenate ones to the features
         self.is_fitted = True
 

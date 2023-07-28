@@ -12,7 +12,9 @@ from typing import List
 
 import ase
 import numpy as np
-from equistore import Labels, TensorBlock, TensorMap
+
+import torch
+from equistore.torch import Labels, TensorBlock, TensorMap
 
 def ase_to_tensormap(
     frames: List[ase.Atoms],
@@ -46,21 +48,21 @@ def ase_to_tensormap(
         values = [f.get_potential_energy() for f in frames]
 
     if forces is not None:
-        positions_gradients = [-f.arrays[forces] for f in frames]
+        positions_gradients = [-torch.tensor(f.arrays[forces]) for f in frames]
     else:
         try:
-            positions_gradients = [-f.get_forces() for f in frames]
+            positions_gradients = [-torch.tensor(f.get_forces()) for f in frames]
         except ase.ase.calculators.calculator.PropertyNotImplementedError:
             positions_gradients = None
         
 
     if stress is not None:
-        cell_gradients = [-f.info[stress] for f in frames]
+        cell_gradients = [-torch.tensor(f.info[stress]) for f in frames]
     else:
         #if frame has a calculator, use it to get stress
         if frames[0].calc is not None:
             try:
-                cell_gradients = [-f.get_stress(voigt=False) for f in frames]
+                cell_gradients = [-torch.tensor(f.get_stress(voigt=False)) for f in frames]
             except ase.ase.calculators.calculator.PropertyNotImplementedError:
                 cell_gradients = None
         else:
@@ -111,10 +113,10 @@ def properties_to_tensormap(
     n_structures = len(values)
 
     block = TensorBlock(
-        values=np.asarray(values).reshape(-1, 1),
-        samples=Labels(["structure"], np.arange(n_structures).reshape(-1, 1)),
+        values=torch.tensor(values).reshape(-1, 1),
+        samples=Labels(["structure"], torch.arange(n_structures).reshape(-1, 1)),
         components=[],
-        properties=Labels([property_name], np.array([(0,)])),
+        properties=Labels([property_name], torch.tensor([(0,)])),
     )
 
     if positions_gradients is not None:
@@ -124,7 +126,7 @@ def properties_to_tensormap(
                 f"{len(positions_gradients)} positions_gradients values"
             )
 
-        gradient_values = np.concatenate(positions_gradients, axis=0)
+        gradient_values = torch.cat(positions_gradients, axis=0)
 
         if gradient_values.shape[1] != 3:
             raise ValueError(
@@ -137,19 +139,19 @@ def properties_to_tensormap(
         # we can keep `"sample"` and `"structure"` the same.
         position_gradient_samples = Labels(
             ["sample", "structure", "atom"],
-            np.array(
+            torch.tensor(np.array(
                 [
                     [s, s, a]
                     for s in range(n_structures)
                     for a in range(len(positions_gradients[s]))
                 ]
-            ),
+            ))
         )
 
         positions_gradient = TensorBlock(
-            values=gradient_values.reshape(-1, 3, 1),
+            values=torch.tensor(gradient_values.reshape(-1, 3, 1)),
             samples=position_gradient_samples,
-            components=[Labels(["direction"], np.arange(3).reshape(-1, 1))],
+            components=[Labels(["direction"], torch.arange(3).reshape(-1, 1))],
             properties=block.properties,
         )
         block.add_gradient("positions", positions_gradient)
@@ -161,7 +163,7 @@ def properties_to_tensormap(
                 f"{len(cell_gradients)} cell_gradients values"
             )
 
-        gradient_values = np.asarray(cell_gradients)
+        gradient_values = torch.tensor(np.asarray(cell_gradients))
 
         if gradient_values.shape[1:] != (3, 3):
             raise ValueError(
@@ -172,12 +174,12 @@ def properties_to_tensormap(
         # the values of the sample labels are chosen in the same way as for the
         # positions_gradients. See comment above for a detailed explanation.
         cell_gradient_samples = Labels(
-            ["sample"], np.array([[s] for s in range(n_structures)])
+            ["sample"], torch.tensor(np.array([[s] for s in range(n_structures)]))
         )
 
         components = [
-            Labels(["direction_1"], np.arange(3).reshape(-1, 1)),
-            Labels(["direction_2"], np.arange(3).reshape(-1, 1)),
+            Labels(["direction_1"], torch.arange(3).reshape(-1, 1)),
+            Labels(["direction_2"], torch.arange(3).reshape(-1, 1)),
         ]
 
         cell_gradient = TensorBlock(

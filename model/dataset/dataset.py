@@ -41,18 +41,24 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equistore_torch_operations_futures"))
 
 import ase
 import torch
 from .dataset_helpers import get_global_unique_species
-from convert import ase_to_tensormap
+from convert_torch import ase_to_tensormap
+
+
 from typing import List, Union, Tuple
 import rascaline
 import equistore
-import rascaline_torch
+import equistore.torch
+import rascaline.torch
+
 import copy
 from itertools import combinations_with_replacement
 import numpy as np
+from join import join
 
 class RascalineAtomisticDataset(torch.utils.data.Dataset):
     """ A dataset for general rascaline calculators
@@ -77,15 +83,16 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         pairs = np.array(list(perm)).reshape(-1,2)
         pairs_comb = equistore.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
 
-        feat = [f.keys_to_properties(pairs_comb) for f in feat]
+        feat = [f.keys_to_properties(["species_neighbor_1","species_neighbor_2"]) for f in feat]
 
-        return equistore.join(feat,axis="properties")  
+        return join(feat,axis="properties")  
 
     
     def __init__(
         self,
         frames: Union[ase.Atoms,List[ase.Atoms]],
-        calculators: Union[rascaline.calculators.CalculatorBase,List[rascaline.calculators.CalculatorBase]],
+        calculators: Union[rascaline.torch.calculators.CalculatorModule,\
+                           List[rascaline.torch.calculators.CalculatorModule]],
         hypers: Union[dict,List[dict]] = None,
         do_gradients: bool = False,
         do_cell_gradients: bool = False,
@@ -124,11 +131,13 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
             frames = [frames]
         
         # TODO: more logic to check for calculators?
-        if isinstance(calculators, rascaline.calculators.CalculatorBase):
+        if isinstance(calculators, rascaline.torch.calculators.CalculatorModule):
+            #print(type(calculators))
             print("single calculator passed")
             #TODO: write test for this
             calculators = [calculators]
         
+        #print(calculators)
         assert len(calculators) > 0
         
         self.do_gradients = do_gradients
@@ -160,12 +169,12 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         
         # TODO: make this more general
         #self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key) for frame in frames]
-        self.properties = [equistore.to(ase_to_tensormap(frame, energy_key, forces_key, stress_key),"torch",dtype=torch.float64)
+        self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key)
                                          for frame in frames]
         
         
         for frame in frames:
-            system = rascaline_torch.as_torch_system(copy.deepcopy(frame),
+            system = rascaline.torch.systems_to_torch(copy.deepcopy(frame),
                                                      positions_requires_grad=self.do_gradients,
                                                      cell_requires_grad=self.do_cell_gradients,)
 
@@ -187,12 +196,8 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         self.calculators = []
 
         for calculator in calculators:
-            
-            torch_calculator = rascaline_torch.Calculator(
-                                calculator
-                                )
-            
-            self.calculators.append(torch_calculator)
+
+            self.calculators.append(calculator)
 
         #TODO: check this
         self.feats = {n : None for n in range(len(self.frames))}
@@ -329,7 +334,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
 
 
-def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.TensorMap, rascaline_torch.System]]):
+def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.TensorMap, rascaline.torch.System]]):
     #TODO: add renumbering of the tensor maps, (idx)
 
     feats = [tensor_map[0] for tensor_map in tensor_maps]
@@ -337,14 +342,21 @@ def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.Ten
     #for tensor_map in tensor_maps: tensor_map[2].positions.detach()
     systems = [tensor_map[2] for tensor_map in tensor_maps]
 
+    #print(type(feats[0]))
+    #print(type(feats[0].block(0).values))  
+    #print(type(feats[0].block(0).samples))  
+
+    #print(type(properties[0]))
+
     ##for now do densification on the fly 
      
-    return equistore.join(feats, axis="samples"), equistore.join(properties, axis="samples"), systems
+    return join(feats, axis="samples"), join(properties, axis="samples"), systems
+#equistore.join(properties, axis="samples"), systems
 
 
 def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
-    calculators: Union[rascaline.calculators.CalculatorBase,List[rascaline.calculators.CalculatorBase]],
+    calculators: Union[rascaline.torch.calculators.CalculatorModule,List[rascaline.torch.calculators.CalculatorModule]],
     do_gradients: bool = False,
     precompute: bool = False,
     lazy_fill_up: bool = True,
@@ -365,6 +377,9 @@ def create_rascaline_dataloader(
     sampler = None,
     batch_sampler = None,
     dataset_kwargs = None,
+    energy_key: str = None,
+    forces_key: str = None,
+    stress_key: str = None,
     **kwargs,
     ):
     """creates a rascaline dataloader
@@ -377,6 +392,9 @@ def create_rascaline_dataloader(
         lazy_fill_up,
         transforms,
         memory_save,
+        energy_key=energy_key,
+        forces_key=forces_key,
+        stress_key=stress_key,
     )
 
     dataloader = torch.utils.data.DataLoader(

@@ -1,31 +1,33 @@
 import torch
 import equistore
-import rascaline_torch
+import rascaline.torch
 import numpy as np
 from torch.autograd import grad
 from typing import List
+
+from equistore.torch import TensorMap, TensorBlock, Labels
 
 class UnitResponse(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
         # the unitresponse does nothing
-    def initialize_weights(self, input: equistore.TensorMap):
+    def initialize_weights(self, input: TensorMap):
         pass
     
-    def forward(self, input: equistore.TensorMap, systems: List[rascaline_torch.System]) -> equistore.TensorMap:
+    def forward(self, input: TensorMap, systems: List[rascaline.torch.System]) -> TensorMap:
         return input
         
 
 class ForceRespone(UnitResponse):
 
     def forward(self, 
-                input: equistore.TensorMap, 
-                systems: List[rascaline_torch.System]) -> equistore.TensorMap:
+                input: TensorMap, 
+                systems: List[rascaline.torch.System]) -> TensorMap:
 
         outputs = list(torch.ones_like(input.block(0).values))
 
-        forces = grad(outputs=list(input.block(0).values),
+        dEdx = grad(outputs=list(input.block(0).values),
                       inputs=[sys_i.positions for sys_i in systems],
                       grad_outputs=outputs,
                       create_graph=True,
@@ -34,24 +36,24 @@ class ForceRespone(UnitResponse):
         #print("hello")
 
         #negative forces, are position gradients
-        gradient_values = -torch.vstack(forces)
+        gradient_values = torch.vstack(dEdx)
 
-        position_gradient_samples = equistore.Labels(
+        position_gradient_samples = Labels(
             ["sample", "structure", "atom"],
-            np.array(
+            torch.tensor(np.array(
                 [
                     [s, s, a]
                     for s in range(len(systems))
-                    for a in range(len(forces[s]))
+                    for a in range(len(dEdx[s]))
                 ]
-            ),
+            ))
         )
 
         #TODO: change to torch labels once move to rascaline.rascaline-torch
-        positions_gradient = equistore.TensorBlock(
+        positions_gradient = TensorBlock(
             values=gradient_values.reshape(-1, 3, 1),
             samples=position_gradient_samples,
-            components=[equistore.Labels(["direction"], np.arange(3).reshape(-1, 1))],
+            components=[Labels(["direction"], torch.arange(3).reshape(-1, 1))],
             properties=input.block(0).properties,
         )
 
@@ -60,5 +62,5 @@ class ForceRespone(UnitResponse):
 
         #print(input.keys)
 
-        return equistore.TensorMap(input.keys, [block_c])
+        return TensorMap(input.keys, [block_c])
 
