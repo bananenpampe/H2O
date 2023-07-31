@@ -13,6 +13,8 @@ import rascaline
 import rascaline.torch
 import torch
 import ase.io
+import torch._dynamo
+import traceback as tb
 
 from transformer.composition import CompositionTransformer
 
@@ -52,6 +54,16 @@ dataloader = create_rascaline_dataloader(frames_water,
                                          batch_size=10, 
                                          shuffle=False)
 
+dataloader_val = create_rascaline_dataloader(frames_water,
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
+                                         calculators=calc_sr,
+                                         do_gradients=True,
+                                         precompute = True,
+                                         lazy_fill_up = False,
+                                         batch_size=10, 
+                                         shuffle=False)
+
 # --- create the trainer ---
 # for now a batch of features is necessary 
 # for correct weight init
@@ -64,6 +76,16 @@ transformer_e.fit(syst, prop)
 # define the trainer
 module = BPNNRascalineModule(feat, transformer_e)
 
-# --- train the model ---
+#compiled_model = torch.compile(module,fullgraph=True )
+
 trainer = Trainer(max_epochs=5, precision=64, accelerator="cpu")
-trainer.fit(module, dataloader, )
+trainer.fit(module, dataloader, dataloader_val)
+
+
+"""
+torch._dynamo.reset()
+explanation, out_guards, graphs, ops_per_graph, break_reasons, explanation_verbose = torch._dynamo.explain(
+    module, feat, syst
+)
+print(explanation_verbose)
+"""

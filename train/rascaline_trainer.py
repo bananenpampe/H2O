@@ -33,38 +33,23 @@ class BPNNRascalineModule(pl.LightningModule):
         print("computing loss")
         self.log('train_loss', loss, enable_graph=True)
         return loss
-    
+
+    def on_validation_model_eval(self, *args, **kwargs):
+        super().on_validation_model_eval(*args, **kwargs)
+        torch.set_grad_enabled(True)
+
     def validation_step(self, batch, batch_idx):
-        
-        print("hello, I am here")
 
-        with torch.enable_grad():
 
-            feats, properties, systems = batch
 
-            for key, block in feats.items():
-                block.values.requires_grad_(requires_grad=True)
-                for grad_key, grad_block in block.gradients():
-                    grad_block.values.requires_grad_(requires_grad=True)
-            
-            for system in systems:
-                system.positions.requires_grad_(requires_grad=True)
-            
+        feats, properties, systems = batch
 
-            print(feats.block(0).values.requires_grad)
+        outputs = self(feats, systems)
+        #outputs = self.energy_transformer.inverse_transform(systems, outputs)
 
-            print("hello, I am here again")
+        energy_val_mse, forces_val_mse = self.loss_fn.report(outputs, properties)
 
-            print
-
-            outputs = self(feats, systems)
-            
-            print("hello, I am here aswell")
-            #outputs = self.energy_transformer.inverse_transform(systems, outputs)
-
-            energy_val_mse, forces_val_mse = self.loss_fn.report(outputs, properties)
-
-            loss = energy_val_mse + forces_val_mse
+        loss = energy_val_mse + forces_val_mse
 
         #self.log('val_loss', loss.item())
 
