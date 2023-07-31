@@ -10,6 +10,7 @@ from nn.model import BPNNModel
 from nn.loss import EnergyForceLoss
 
 class BPNNRascalineModule(pl.LightningModule):
+    
     def __init__(self, example_tensormap, energy_transformer):
         super().__init__()
         self.model = BPNNModel()
@@ -24,6 +25,8 @@ class BPNNRascalineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         feats, properties, systems = batch
 
+        batch_size = len(systems)
+
         #print(feats.block(0).values.requires_grad)
 
         properties = self.energy_transformer.transform(systems, properties)
@@ -31,7 +34,7 @@ class BPNNRascalineModule(pl.LightningModule):
         outputs = self(feats,systems)
         loss = self.loss_fn(outputs, properties)
         print("computing loss")
-        self.log('train_loss', loss, enable_graph=True)
+        self.log('train_loss', loss, enable_graph=True, batch_size=batch_size)
         return loss
 
     def on_validation_model_eval(self, *args, **kwargs):
@@ -40,36 +43,49 @@ class BPNNRascalineModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
 
-
-
         feats, properties, systems = batch
 
+        energies = properties.block(0).values 
+        forces = properties.block(0).gradient("positions").values
+
+        batch_size = len(systems)
+
         outputs = self(feats, systems)
-        #outputs = self.energy_transformer.inverse_transform(systems, outputs)
+        outputs = self.energy_transformer.inverse_transform(systems, outputs)
 
         energy_val_mse, forces_val_mse = self.loss_fn.report(outputs, properties)
 
         loss = energy_val_mse + forces_val_mse
 
-        #self.log('val_loss', loss.item())
+        self.log('val_loss', loss.item(), batch_size=batch_size)
+        self.log("val_energy_mse", torch.clone(energy_val_mse), batch_size=batch_size)
+        self.log("val_forces_mse", torch.clone(forces_val_mse), batch_size=batch_size)
 
-        #self.log("val_energy_mse", torch.clone(energy_val_mse))
-        #self.log("val_forces_mse", torch.clone(forces_val_mse))
+        # log rmse
+        self.log("val_energy_rmse", torch.sqrt(torch.clone(energy_val_mse)), batch_size=batch_size)
+        self.log("val_forces_rmse", torch.sqrt(torch.clone(forces_val_mse)), batch_size=batch_size)
+
+        # log percent rmse
+        self.log("val_energy_%rmse", torch.sqrt(torch.clone(energy_val_mse))/energies.std(), batch_size=batch_size)
+        self.log("val_forces_%rmse", torch.sqrt(torch.clone(forces_val_mse))/forces.std(), batch_size=batch_size)
 
         return loss
 
     def test_step(self, batch, batch_idx):
         feats, properties, systems = batch
+
+        batch_size = len(systems)
+
         outputs = self(feats, systems)
 
-        #outputs = self.energy_transformer.inverse_transform(systems, outputs)
+        outputs = self.energy_transformer.inverse_transform(systems, outputs)
         energy_test_mse, forces_test_mse = self.loss_fn.report(outputs, properties)
 
         loss = energy_test_mse + forces_test_mse 
-        #self.log('test_loss', torch.clone(loss))
+        self.log('test_loss', torch.clone(loss))
 
-        #self.log("test_energy_mse", torch.clone(energy_test_mse))
-        #self.log("test_forces_mse", torch.clone(forces_test_mse))
+        self.log("test_energy_mse", torch.clone(energy_test_mse), batch_size = batch_size)
+        self.log("test_forces_mse", torch.clone(forces_test_mse), batch_size = batch_size)
 
         return loss
 
@@ -77,5 +93,5 @@ class BPNNRascalineModule(pl.LightningModule):
         loss.backward(retain_graph=True)
         
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.001)
+        optimizer = torch.optim.LBFGS(self.parameters(), lr=1., line_search_fn="strong_wolfe")
         return optimizer

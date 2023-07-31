@@ -153,7 +153,8 @@ class CompositionTransformer(torch.nn.Module):
 
         #out_map = equistore.TensorMap(targets.keys, [out_block])
 
-        for gradient_key, gradient in targets.block(0).gradients():
+        for gradient_key in targets.block(0).gradients():
+            gradient =  targets.block(0).gradient(gradient_key)
             out_block.add_gradient(gradient_key, gradient.copy())
 
         out_map = TensorMap(targets.keys, [out_block])
