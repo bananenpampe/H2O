@@ -22,7 +22,6 @@ import equistore
 from equistore.torch import TensorMap, TensorBlock
 
 import torch
-import sklearn.linear_model
 
 import sys 
 import os
