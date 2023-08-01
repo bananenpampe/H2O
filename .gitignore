@@ -163,3 +163,18 @@ cython_debug/
 
 # ignore all subdirectories of the ./data directory
 /data/*/
+
+#allway ignorde file called wandb.txt
+wandb.txt
+
+#ignore all pytorch lightning .ckpt
+*.ckpt
+
+#all config files
+*.yaml
+
+#all wandb files
+wandb/
+
+#all tfevents
+*tfevents*
