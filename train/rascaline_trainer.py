@@ -66,17 +66,42 @@ class BPNNRascalineModule(pl.LightningModule):
 
         loss = energy_val_mse + forces_val_mse
 
-        self.log('val_loss', loss.item(), batch_size=batch_size)
-        self.log("val_energy_mse", torch.clone(energy_val_mse), batch_size=batch_size)
-        self.log("val_forces_mse", torch.clone(forces_val_mse), batch_size=batch_size)
+        self.log('val_loss',
+                 loss.item(),
+                 batch_size=batch_size,
+                 on_epoch=True)
+        
+        self.log("val_energy_mse",
+                 torch.clone(energy_val_mse),
+                 batch_size=batch_size,
+                 on_epoch=True)
+        
+        self.log("val_forces_mse",
+                 torch.clone(forces_val_mse), 
+                 batch_size=batch_size,
+                 on_epoch=True)
 
         # log rmse
-        self.log("val_energy_rmse", torch.sqrt(torch.clone(energy_val_mse)), batch_size=batch_size)
-        self.log("val_forces_rmse", torch.sqrt(torch.clone(forces_val_mse)), batch_size=batch_size)
+        self.log("val_energy_rmse",
+                 torch.sqrt(torch.clone(energy_val_mse)),
+                 batch_size=batch_size,
+                 on_epoch=True)
+        
+        self.log("val_forces_rmse",
+                 torch.sqrt(torch.clone(forces_val_mse)),
+                 batch_size=batch_size,
+                 on_epoch=True)
 
         # log percent rmse
-        self.log("val_energy_%rmse", torch.sqrt(torch.clone(energy_val_mse))/energies.std(), batch_size=batch_size)
-        self.log("val_forces_%rmse", torch.sqrt(torch.clone(forces_val_mse))/forces.std(), batch_size=batch_size)
+        self.log("val_energy_%rmse",
+                 torch.sqrt(torch.clone(energy_val_mse))/energies.std(),
+                 batch_size=batch_size,
+                 on_epoch=True)
+        
+        self.log("val_forces_%rmse",
+                 torch.sqrt(torch.clone(forces_val_mse))/forces.std(),
+                 batch_size=batch_size,
+                 on_epoch=True)
 
         return loss
 
@@ -114,6 +139,7 @@ class BPNNRascalineModule(pl.LightningModule):
             "lr_scheduler": {
                 "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=50, factor=0.75, verbose=True),
                 "monitor": "val_forces_%rmse",
+                "interval": "epoch",
                 "frequency": 1
                 # If "monitor" references validation metrics, then "frequency" should be set to a
                 # multiple of "trainer.check_val_every_n_epoch".

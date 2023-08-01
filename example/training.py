@@ -38,8 +38,8 @@ for n, frame in enumerate(frames_water):
     frame.info["CONVERTED_ID"] = n
 
 # select a subset of the frames
-frames_water_train = frames_water[:25]
-frames_water_val = frames_water[25:50]
+frames_water_train = frames_water[:50]
+frames_water_val = frames_water[50:60]
 
 id_train = []
 id_test = []
@@ -79,7 +79,7 @@ dataloader = create_rascaline_dataloader(frames_water_train,
                                          do_gradients=True,
                                          precompute = True,
                                          lazy_fill_up = False,
-                                         batch_size=8, 
+                                         batch_size=4, 
                                          shuffle=False)
 
 dataloader_val = create_rascaline_dataloader(frames_water_val,
@@ -125,12 +125,15 @@ module = BPNNRascalineModule(feat, transformer_e)
 #compiled_model = torch.compile(module,fullgraph=True )
 lr_monitor = LearningRateMonitor(logging_interval='epoch')
 
-trainer = Trainer(max_epochs=10000,
+trainer = Trainer(max_epochs=100,
                   precision=64,
                   accelerator="cpu",
                   logger=wandb_logger,
                   callbacks=[lr_monitor],
                   gradient_clip_val=100,
-                  enable_progress_bar=False)
+                  enable_progress_bar=False,
+                  val_check_interval=1.0,
+                  check_val_every_n_epoch=1,)
+                  #profiler="simple")
 
 trainer.fit(module, dataloader, dataloader_val)
