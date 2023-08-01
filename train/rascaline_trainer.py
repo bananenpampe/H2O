@@ -13,7 +13,8 @@ class BPNNRascalineModule(pl.LightningModule):
     
     def __init__(self, example_tensormap, energy_transformer, regularization=1e-03):
         super().__init__()
-        self.save_hyperparameters({'l2 reg': regularization})
+        #print(regularization)
+        #self.save_hyperparameters({'l2 reg': regularization})
         self.model = BPNNModel()
         self.model.initialize_weights(example_tensormap)
         self.loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.95)
