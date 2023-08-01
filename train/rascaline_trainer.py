@@ -11,12 +11,14 @@ from nn.loss import EnergyForceLoss
 
 class BPNNRascalineModule(pl.LightningModule):
     
-    def __init__(self, example_tensormap, energy_transformer):
+    def __init__(self, example_tensormap, energy_transformer, lambda_=1e-03):
         super().__init__()
+        self.save_hyperparameters({'l2 reg': lambda_})
         self.model = BPNNModel()
         self.model.initialize_weights(example_tensormap)
         self.loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.95)
         self.energy_transformer = energy_transformer
+        self.lambda_ = lambda_
 
     def forward(self, feats, systems):
         return self.model(feats, systems)
@@ -33,8 +35,12 @@ class BPNNRascalineModule(pl.LightningModule):
 
         outputs = self(feats,systems)
         loss = self.loss_fn(outputs, properties)
-        print("computing loss")
+
         self.log('train_loss', loss, enable_graph=True, batch_size=batch_size)
+
+        for param in self.parameters():
+            loss += self.lambda_ * torch.norm(param)**2
+
         return loss
 
     def on_validation_model_eval(self, *args, **kwargs):

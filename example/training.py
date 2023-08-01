@@ -32,10 +32,7 @@ random.shuffle(frames_water)
 
 # select a subset of the frames
 frames_water_train = frames_water[:75]
-
-frames_water_val = frames_water[75:125]
-                                                                     
-                                                                    
+frames_water_val = frames_water[75:125]                                                                                     
 
 # --- define the hypers ---
 hypers_sr = {
@@ -43,7 +40,7 @@ hypers_sr = {
     "max_radial": 5,
     "max_angular": 3,
     "atomic_gaussian_width": 0.3,
-    "center_atom_weight": 1.0,
+    "center_atom_weight": 0.0,
     "radial_basis": {
         "Gto": {},
     },
@@ -54,6 +51,7 @@ hypers_sr = {
 }
 
 # --- define calculator ---
+#calc_sr_ = rascaline.SoapPowerSpectrum(**hypers_sr)
 calc_sr = rascaline.torch.SoapPowerSpectrum(**hypers_sr)
 
 # --- create the dataloader ---
@@ -89,8 +87,11 @@ with open("wandb.txt", "r") as f:
     wandb_api_key = f.readline()
 
 wandb.login(key=wandb_api_key)
-wandb_logger = WandbLogger(project="H2O-sr")
+wandb_logger = WandbLogger(project="H2O-sr",log_model=True)
 wandb_logger.experiment.config["key"] = wandb_api_key
+
+# log the descriptor hyperparameters
+wandb_logger.log_hyperparams(hypers_sr)
 
 feat, prop, syst = next(iter(dataloader))
 
@@ -102,5 +103,5 @@ module = BPNNRascalineModule(feat, transformer_e)
 
 #compiled_model = torch.compile(module,fullgraph=True )
 
-trainer = Trainer(max_epochs=25, precision=64, accelerator="cpu", logger=wandb_logger)
+trainer = Trainer(max_epochs=5, precision=64, accelerator="cpu", logger=wandb_logger)
 trainer.fit(module, dataloader, dataloader_val)

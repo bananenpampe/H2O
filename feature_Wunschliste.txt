@@ -1,0 +1,19 @@
+
+transformers:
+have gobal transformers
+- using any of the rascaline features
+
+
+
+uncertainty estimates:
+NLL_loss, CPRS_loss
+ensemble-trainer and ensemble-gatherer (for deep-ens, MVE_model or Mean_only model)
+
+training scheduler:
+for NLL ensembles.
+have a training routine (1st 100 epochs mse train then slowly NLL weight increase)
+
+active learning loop:
+in the driver the model predicts uncertainty, if sigma > tresh.
+the model instead of doing a step launches a calculator, recalculates the step, refits the potential
+and attempts to do the step again.
