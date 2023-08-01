@@ -16,7 +16,7 @@ class MLP_mean(torch.nn.Module):
                  n_out: int,
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
-                 activation: torch.nn.Module = torch.nn.Tanh) -> None:
+                 activation: torch.nn.Module = torch.nn.SiLU) -> None:
         
         """
         Args:
