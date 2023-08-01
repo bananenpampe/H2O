@@ -17,7 +17,7 @@ class BPNNRascalineModule(pl.LightningModule):
         #self.save_hyperparameters({'l2 reg': regularization})
         self.model = BPNNModel()
         self.model.initialize_weights(example_tensormap)
-        self.loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.95)
+        self.loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.999)
         self.energy_transformer = energy_transformer
         self.regularization = regularization
 
@@ -38,9 +38,11 @@ class BPNNRascalineModule(pl.LightningModule):
         loss = self.loss_fn(outputs, properties)
 
         self.log('train_loss', loss, enable_graph=True, batch_size=batch_size)
-
+        
+        """
         for param in self.parameters():
             loss += self.regularization * torch.norm(param)**2
+        """
 
         return loss
 
@@ -98,7 +100,22 @@ class BPNNRascalineModule(pl.LightningModule):
 
     def backward(self, loss, *args, **kwargs):
         loss.backward(retain_graph=True)
-        
+
+    """ 
     def configure_optimizers(self):
         optimizer = torch.optim.LBFGS(self.parameters(), lr=1., line_search_fn="strong_wolfe")
         return optimizer
+    """
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(),lr=1e-3, amsgrad=True)
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=50, factor=0.75, verbose=True),
+                "monitor": "val_forces_%rmse",
+                "frequency": 1
+                # If "monitor" references validation metrics, then "frequency" should be set to a
+                # multiple of "trainer.check_val_every_n_epoch".
+            },
+        }

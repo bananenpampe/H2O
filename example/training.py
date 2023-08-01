@@ -20,6 +20,8 @@ import traceback as tb
 import random
 
 from transformer.composition import CompositionTransformer
+from pytorch_lightning.callbacks import LearningRateMonitor
+
 
 #default type is float64
 torch.set_default_dtype(torch.float64)
@@ -28,17 +30,31 @@ torch.set_default_dtype(torch.float64)
 frames_water = ase.io.read("../data/water_converted.xyz", index=":")
 
 # shuffle the frames
+SEED = 0
+random.seed(SEED)
 random.shuffle(frames_water)
 
+for n, frame in enumerate(frames_water):
+    frame.info["CONVERTED_ID"] = n
+
 # select a subset of the frames
-frames_water_train = frames_water[:75]
-frames_water_val = frames_water[75:125]                                                                                     
+frames_water_train = frames_water[:25]
+frames_water_val = frames_water[25:50]
+
+id_train = []
+id_test = []
+
+for frame in frames_water_train:
+    id_train.append(frame.info["CONVERTED_ID"])
+
+for frame in frames_water_val:
+    id_test.append(frame.info["CONVERTED_ID"])
 
 # --- define the hypers ---
 hypers_sr = {
-    "cutoff": 3.0,
+    "cutoff": 5.6,
     "max_radial": 5,
-    "max_angular": 3,
+    "max_angular": 5,
     "atomic_gaussian_width": 0.3,
     "center_atom_weight": 0.0,
     "radial_basis": {
@@ -47,8 +63,9 @@ hypers_sr = {
     "cutoff_function": {
         "ShiftedCosine": {"width":0.5},
     },
-    "radial_scaling":{"Willatt2018": {"exponent": 3.0, "rate": 1.5, "scale": 2.0}}
+    "radial_scaling":{"Willatt2018": {"exponent": 6.0, "rate": 2.0, "scale": 3.4}}
 }
+
 
 # --- define calculator ---
 #calc_sr_ = rascaline.SoapPowerSpectrum(**hypers_sr)
@@ -62,7 +79,7 @@ dataloader = create_rascaline_dataloader(frames_water_train,
                                          do_gradients=True,
                                          precompute = True,
                                          lazy_fill_up = False,
-                                         batch_size=len(frames_water_train), 
+                                         batch_size=8, 
                                          shuffle=False)
 
 dataloader_val = create_rascaline_dataloader(frames_water_val,
@@ -93,6 +110,10 @@ wandb_logger.experiment.config["key"] = wandb_api_key
 # log the descriptor hyperparameters
 wandb_logger.log_hyperparams(hypers_sr)
 
+print("train split:",id_train)
+print("test_split:",id_test)
+print("seed", SEED)
+
 feat, prop, syst = next(iter(dataloader))
 
 transformer_e = CompositionTransformer()
@@ -102,6 +123,14 @@ transformer_e.fit(syst, prop)
 module = BPNNRascalineModule(feat, transformer_e)
 
 #compiled_model = torch.compile(module,fullgraph=True )
+lr_monitor = LearningRateMonitor(logging_interval='epoch')
 
-trainer = Trainer(max_epochs=5, precision=64, accelerator="cpu", logger=wandb_logger)
+trainer = Trainer(max_epochs=10000,
+                  precision=64,
+                  accelerator="cpu",
+                  logger=wandb_logger,
+                  callbacks=[lr_monitor],
+                  gradient_clip_val=100,
+                  enable_progress_bar=False)
+
 trainer.fit(module, dataloader, dataloader_val)
