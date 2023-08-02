@@ -18,10 +18,13 @@ import equistore
 torch.set_default_dtype(torch.float64)
 
 # --- load the data ---
-frames_water = load_PBE0_TS()[:150]
-frames_train = frames_water[:100]
-frames_val = frames_water[100:150]
-frames_test = frames_water[20:30]
+frames_water = ase.io.read("../data/water_converted.xyz", index=":")
+#print(torch.std(torch.tensor([float(len(frame)) for frame in frames_water])))
+random.shuffle(frames_water)
+
+frames_water = frames_water[:50]
+frames_train = frames_water[:40]
+frames_val = frames_water[40:]
 
 # --- define the hypers ---
 hypers_sr = {
