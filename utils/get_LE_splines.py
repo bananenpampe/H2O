@@ -155,9 +155,7 @@ def test_LE_splines(max_radial=8, max_angular=6, cutoff=5.0):
     requested_accuracy=1e-5,
     )
     
-    spline_points = get_LE_splines(max_radial=max_radial,
-                                   max_angular=max_angular,
-                                   cutoff=cutpff)
+    spline_points = get_LE_splines(max_radial=8, max_angular=6, cutoff=5.0)
 
     hypers_spherical_expansion = {
     "cutoff": cutoff,

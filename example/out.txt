@@ -1,149 +1,0 @@
-single calculator passed
-single calculator passed
-single calculator passed
-single calculator passed
-epoch:  0
-Training: 0it [00:00, ?it/s]Training:   0%|          | 0/5 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s] computing loss
-Epoch 0:  20%|██        | 1/5 [00:00<00:00, 31.29it/s]Epoch 0:  20%|██        | 1/5 [00:00<00:00, 31.07it/s, v_num=76]computing loss
-Epoch 0:  40%|████      | 2/5 [00:00<00:00, 23.71it/s, v_num=76]Epoch 0:  40%|████      | 2/5 [00:00<00:00, 23.66it/s, v_num=76]computing loss
-Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 23.18it/s, v_num=76]Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 23.15it/s, v_num=76]computing loss
-Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 22.60it/s, v_num=76]Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 22.59it/s, v_num=76]computing loss
-Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 22.66it/s, v_num=76]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 22.65it/s, v_num=76]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 22.63it/s, v_num=76]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]        Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]computing loss
-Epoch 1:  20%|██        | 1/5 [00:00<00:00, 59.82it/s, v_num=76]Epoch 1:  20%|██        | 1/5 [00:00<00:00, 59.23it/s, v_num=76]computing loss
-Epoch 1:  40%|████      | 2/5 [00:00<00:00, 59.20it/s, v_num=76]Epoch 1:  40%|████      | 2/5 [00:00<00:00, 58.91it/s, v_num=76]computing loss
-Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 59.42it/s, v_num=76]Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 59.25it/s, v_num=76]computing loss
-Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 59.83it/s, v_num=76]Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 59.69it/s, v_num=76]computing loss
-Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 59.42it/s, v_num=76]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 59.31it/s, v_num=76]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 59.18it/s, v_num=76]Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]        Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]computing loss
-Epoch 2:  20%|██        | 1/5 [00:00<00:00, 60.26it/s, v_num=76]Epoch 2:  20%|██        | 1/5 [00:00<00:00, 59.64it/s, v_num=76]computing loss
-Epoch 2:  40%|████      | 2/5 [00:00<00:00, 60.57it/s, v_num=76]Epoch 2:  40%|████      | 2/5 [00:00<00:00, 60.27it/s, v_num=76]computing loss
-Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 60.06it/s, v_num=76]Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 59.87it/s, v_num=76]computing loss
-Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 59.88it/s, v_num=76]Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 59.74it/s, v_num=76]computing loss
-Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 59.69it/s, v_num=76]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 59.58it/s, v_num=76]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 59.46it/s, v_num=76]Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]        Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]computing loss
-Epoch 3:  20%|██        | 1/5 [00:00<00:00, 54.34it/s, v_num=76]Epoch 3:  20%|██        | 1/5 [00:00<00:00, 53.80it/s, v_num=76]computing loss
-Epoch 3:  40%|████      | 2/5 [00:00<00:00, 55.79it/s, v_num=76]Epoch 3:  40%|████      | 2/5 [00:00<00:00, 55.56it/s, v_num=76]computing loss
-Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 57.68it/s, v_num=76]Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 57.46it/s, v_num=76]computing loss
-Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 56.90it/s, v_num=76]Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 56.77it/s, v_num=76]computing loss
-Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 57.30it/s, v_num=76]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 57.19it/s, v_num=76]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 57.08it/s, v_num=76]Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]        Epoch 4:   0%|          | 0/5 [00:00<?, ?it/s, v_num=76]computing loss
-Epoch 4:  20%|██        | 1/5 [00:00<00:00, 60.48it/s, v_num=76]Epoch 4:  20%|██        | 1/5 [00:00<00:00, 59.95it/s, v_num=76]computing loss
-Epoch 4:  40%|████      | 2/5 [00:00<00:00, 58.85it/s, v_num=76]Epoch 4:  40%|████      | 2/5 [00:00<00:00, 58.56it/s, v_num=76]computing loss
-Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 59.64it/s, v_num=76]Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 59.42it/s, v_num=76]computing loss
-Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 58.86it/s, v_num=76]Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 58.70it/s, v_num=76]computing loss
-Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 58.69it/s, v_num=76]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 58.54it/s, v_num=76]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 58.38it/s, v_num=76]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 56.64it/s, v_num=76]
-energy_mse:  tensor(6.5057, dtype=torch.float64)
-force_mse:  tensor(4.2798)
-epoch:  1
-Training: 0it [00:00, ?it/s]Training:   0%|          | 0/5 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s] computing loss
-Epoch 0:  20%|██        | 1/5 [00:00<00:00, 60.15it/s]Epoch 0:  20%|██        | 1/5 [00:00<00:00, 59.55it/s, v_num=77]computing loss
-Epoch 0:  40%|████      | 2/5 [00:00<00:00, 60.83it/s, v_num=77]Epoch 0:  40%|████      | 2/5 [00:00<00:00, 60.50it/s, v_num=77]computing loss
-Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 61.95it/s, v_num=77]Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 61.75it/s, v_num=77]computing loss
-Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 62.67it/s, v_num=77]Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 62.50it/s, v_num=77]computing loss
-Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.35it/s, v_num=77]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.22it/s, v_num=77]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.08it/s, v_num=77]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]        Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]computing loss
-Epoch 1:  20%|██        | 1/5 [00:00<00:00, 65.62it/s, v_num=77]Epoch 1:  20%|██        | 1/5 [00:00<00:00, 64.84it/s, v_num=77]computing loss
-Epoch 1:  40%|████      | 2/5 [00:00<00:00, 62.38it/s, v_num=77]Epoch 1:  40%|████      | 2/5 [00:00<00:00, 62.04it/s, v_num=77]computing loss
-Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 61.98it/s, v_num=77]Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 61.76it/s, v_num=77]computing loss
-Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 61.25it/s, v_num=77]Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 61.07it/s, v_num=77]computing loss
-Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 61.57it/s, v_num=77]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 61.42it/s, v_num=77]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 61.16it/s, v_num=77]Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]        Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]computing loss
-Epoch 2:  20%|██        | 1/5 [00:00<00:00, 57.95it/s, v_num=77]Epoch 2:  20%|██        | 1/5 [00:00<00:00, 57.37it/s, v_num=77]computing loss
-Epoch 2:  40%|████      | 2/5 [00:00<00:00, 59.47it/s, v_num=77]Epoch 2:  40%|████      | 2/5 [00:00<00:00, 59.16it/s, v_num=77]computing loss
-Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 59.92it/s, v_num=77]Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 59.72it/s, v_num=77]computing loss
-Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 60.15it/s, v_num=77]Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 60.02it/s, v_num=77]computing loss
-Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.44it/s, v_num=77]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.30it/s, v_num=77]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.17it/s, v_num=77]Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]        Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]computing loss
-Epoch 3:  20%|██        | 1/5 [00:00<00:00, 61.85it/s, v_num=77]Epoch 3:  20%|██        | 1/5 [00:00<00:00, 61.24it/s, v_num=77]computing loss
-Epoch 3:  40%|████      | 2/5 [00:00<00:00, 59.43it/s, v_num=77]Epoch 3:  40%|████      | 2/5 [00:00<00:00, 59.13it/s, v_num=77]computing loss
-Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 60.59it/s, v_num=77]Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 60.37it/s, v_num=77]computing loss
-Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 60.64it/s, v_num=77]Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 60.49it/s, v_num=77]computing loss
-Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 60.82it/s, v_num=77]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 60.70it/s, v_num=77]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 60.58it/s, v_num=77]Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]        Epoch 4:   0%|          | 0/5 [00:00<?, ?it/s, v_num=77]computing loss
-Epoch 4:  20%|██        | 1/5 [00:00<00:00, 62.73it/s, v_num=77]Epoch 4:  20%|██        | 1/5 [00:00<00:00, 62.12it/s, v_num=77]computing loss
-Epoch 4:  40%|████      | 2/5 [00:00<00:00, 63.47it/s, v_num=77]Epoch 4:  40%|████      | 2/5 [00:00<00:00, 63.15it/s, v_num=77]computing loss
-Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 62.99it/s, v_num=77]Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 62.76it/s, v_num=77]computing loss
-Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 64.07it/s, v_num=77]Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 63.90it/s, v_num=77]computing loss
-Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 64.19it/s, v_num=77]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 64.07it/s, v_num=77]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 63.93it/s, v_num=77]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 62.20it/s, v_num=77]
-energy_mse:  tensor(10.5440, dtype=torch.float64)
-force_mse:  tensor(4.2782)
-epoch:  2
-Training: 0it [00:00, ?it/s]Training:   0%|          | 0/5 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s] computing loss
-Epoch 0:  20%|██        | 1/5 [00:00<00:00, 57.58it/s]Epoch 0:  20%|██        | 1/5 [00:00<00:00, 57.10it/s, v_num=78]computing loss
-Epoch 0:  40%|████      | 2/5 [00:00<00:00, 59.20it/s, v_num=78]Epoch 0:  40%|████      | 2/5 [00:00<00:00, 58.92it/s, v_num=78]computing loss
-Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 60.70it/s, v_num=78]Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 60.48it/s, v_num=78]computing loss
-Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 61.21it/s, v_num=78]Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 61.06it/s, v_num=78]computing loss
-Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.39it/s, v_num=78]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.24it/s, v_num=78]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.11it/s, v_num=78]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]        Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]computing loss
-Epoch 1:  20%|██        | 1/5 [00:00<00:00, 63.50it/s, v_num=78]Epoch 1:  20%|██        | 1/5 [00:00<00:00, 62.89it/s, v_num=78]computing loss
-Epoch 1:  40%|████      | 2/5 [00:00<00:00, 62.53it/s, v_num=78]Epoch 1:  40%|████      | 2/5 [00:00<00:00, 62.21it/s, v_num=78]computing loss
-Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 63.96it/s, v_num=78]Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 63.75it/s, v_num=78]computing loss
-Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 64.80it/s, v_num=78]Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 64.63it/s, v_num=78]computing loss
-Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.45it/s, v_num=78]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.32it/s, v_num=78]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.16it/s, v_num=78]Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]        Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]computing loss
-Epoch 2:  20%|██        | 1/5 [00:00<00:00, 65.50it/s, v_num=78]Epoch 2:  20%|██        | 1/5 [00:00<00:00, 64.82it/s, v_num=78]computing loss
-Epoch 2:  40%|████      | 2/5 [00:00<00:00, 66.36it/s, v_num=78]Epoch 2:  40%|████      | 2/5 [00:00<00:00, 66.05it/s, v_num=78]computing loss
-Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 65.04it/s, v_num=78]Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 64.83it/s, v_num=78]computing loss
-Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 65.81it/s, v_num=78]Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 65.61it/s, v_num=78]computing loss
-Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.98it/s, v_num=78]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.85it/s, v_num=78]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.72it/s, v_num=78]Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]        Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]computing loss
-Epoch 3:  20%|██        | 1/5 [00:00<00:00, 69.32it/s, v_num=78]Epoch 3:  20%|██        | 1/5 [00:00<00:00, 68.64it/s, v_num=78]computing loss
-Epoch 3:  40%|████      | 2/5 [00:00<00:00, 66.53it/s, v_num=78]Epoch 3:  40%|████      | 2/5 [00:00<00:00, 66.21it/s, v_num=78]computing loss
-Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 65.92it/s, v_num=78]Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 65.69it/s, v_num=78]computing loss
-Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 65.30it/s, v_num=78]Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 65.15it/s, v_num=78]computing loss
-Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.50it/s, v_num=78]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.36it/s, v_num=78]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.22it/s, v_num=78]Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]        Epoch 4:   0%|          | 0/5 [00:00<?, ?it/s, v_num=78]computing loss
-Epoch 4:  20%|██        | 1/5 [00:00<00:00, 66.76it/s, v_num=78]Epoch 4:  20%|██        | 1/5 [00:00<00:00, 66.09it/s, v_num=78]computing loss
-Epoch 4:  40%|████      | 2/5 [00:00<00:00, 67.40it/s, v_num=78]Epoch 4:  40%|████      | 2/5 [00:00<00:00, 67.07it/s, v_num=78]computing loss
-Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 67.55it/s, v_num=78]Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 67.33it/s, v_num=78]computing loss
-Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 67.48it/s, v_num=78]Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 67.31it/s, v_num=78]computing loss
-Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 66.73it/s, v_num=78]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 66.60it/s, v_num=78]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 66.44it/s, v_num=78]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 64.37it/s, v_num=78]
-energy_mse:  tensor(9.2054, dtype=torch.float64)
-force_mse:  tensor(4.2793)
-epoch:  3
-Training: 0it [00:00, ?it/s]Training:   0%|          | 0/5 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s] computing loss
-Epoch 0:  20%|██        | 1/5 [00:00<00:00, 31.10it/s]Epoch 0:  20%|██        | 1/5 [00:00<00:00, 30.93it/s, v_num=79]computing loss
-Epoch 0:  40%|████      | 2/5 [00:00<00:00, 37.57it/s, v_num=79]Epoch 0:  40%|████      | 2/5 [00:00<00:00, 37.41it/s, v_num=79]computing loss
-Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 41.25it/s, v_num=79]Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 41.15it/s, v_num=79]computing loss
-Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 44.13it/s, v_num=79]Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 44.05it/s, v_num=79]computing loss
-Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 46.48it/s, v_num=79]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 46.40it/s, v_num=79]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 46.33it/s, v_num=79]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]        Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]computing loss
-Epoch 1:  20%|██        | 1/5 [00:00<00:00, 66.07it/s, v_num=79]Epoch 1:  20%|██        | 1/5 [00:00<00:00, 65.40it/s, v_num=79]computing loss
-Epoch 1:  40%|████      | 2/5 [00:00<00:00, 66.96it/s, v_num=79]Epoch 1:  40%|████      | 2/5 [00:00<00:00, 66.66it/s, v_num=79]computing loss
-Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 64.91it/s, v_num=79]Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 64.67it/s, v_num=79]computing loss
-Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 63.67it/s, v_num=79]Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 63.51it/s, v_num=79]computing loss
-Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 64.00it/s, v_num=79]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 63.87it/s, v_num=79]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 63.73it/s, v_num=79]Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]        Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]computing loss
-Epoch 2:  20%|██        | 1/5 [00:00<00:00, 64.37it/s, v_num=79]Epoch 2:  20%|██        | 1/5 [00:00<00:00, 63.74it/s, v_num=79]computing loss
-Epoch 2:  40%|████      | 2/5 [00:00<00:00, 64.87it/s, v_num=79]Epoch 2:  40%|████      | 2/5 [00:00<00:00, 64.55it/s, v_num=79]computing loss
-Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 61.01it/s, v_num=79]Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 60.80it/s, v_num=79]computing loss
-Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 61.15it/s, v_num=79]Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 61.01it/s, v_num=79]computing loss
-Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.72it/s, v_num=79]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.60it/s, v_num=79]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 60.47it/s, v_num=79]Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]        Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]computing loss
-Epoch 3:  20%|██        | 1/5 [00:00<00:00, 61.40it/s, v_num=79]Epoch 3:  20%|██        | 1/5 [00:00<00:00, 60.83it/s, v_num=79]computing loss
-Epoch 3:  40%|████      | 2/5 [00:00<00:00, 61.38it/s, v_num=79]Epoch 3:  40%|████      | 2/5 [00:00<00:00, 61.05it/s, v_num=79]computing loss
-Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 63.53it/s, v_num=79]Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 63.32it/s, v_num=79]computing loss
-Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 64.17it/s, v_num=79]Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 64.02it/s, v_num=79]computing loss
-Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 64.84it/s, v_num=79]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 64.72it/s, v_num=79]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 64.56it/s, v_num=79]Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]        Epoch 4:   0%|          | 0/5 [00:00<?, ?it/s, v_num=79]computing loss
-Epoch 4:  20%|██        | 1/5 [00:00<00:00, 63.47it/s, v_num=79]Epoch 4:  20%|██        | 1/5 [00:00<00:00, 35.55it/s, v_num=79]computing loss
-Epoch 4:  40%|████      | 2/5 [00:00<00:00, 46.74it/s, v_num=79]Epoch 4:  40%|████      | 2/5 [00:00<00:00, 46.58it/s, v_num=79]computing loss
-Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 52.31it/s, v_num=79]Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 52.17it/s, v_num=79]computing loss
-Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 55.32it/s, v_num=79]Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 55.21it/s, v_num=79]computing loss
-Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 57.67it/s, v_num=79]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 57.57it/s, v_num=79]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 57.45it/s, v_num=79]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 56.02it/s, v_num=79]
-energy_mse:  tensor(12.5265, dtype=torch.float64)
-force_mse:  tensor(4.2791)
-epoch:  4
-Training: 0it [00:00, ?it/s]Training:   0%|          | 0/5 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s] computing loss
-Epoch 0:  20%|██        | 1/5 [00:00<00:00, 59.59it/s]Epoch 0:  20%|██        | 1/5 [00:00<00:00, 59.01it/s, v_num=80]computing loss
-Epoch 0:  40%|████      | 2/5 [00:00<00:00, 60.99it/s, v_num=80]Epoch 0:  40%|████      | 2/5 [00:00<00:00, 60.69it/s, v_num=80]computing loss
-Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 62.81it/s, v_num=80]Epoch 0:  60%|██████    | 3/5 [00:00<00:00, 62.64it/s, v_num=80]computing loss
-Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 63.63it/s, v_num=80]Epoch 0:  80%|████████  | 4/5 [00:00<00:00, 63.48it/s, v_num=80]computing loss
-Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 63.21it/s, v_num=80]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 63.09it/s, v_num=80]Epoch 0: 100%|██████████| 5/5 [00:00<00:00, 62.96it/s, v_num=80]Epoch 0:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]        Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]computing loss
-Epoch 1:  20%|██        | 1/5 [00:00<00:00, 68.19it/s, v_num=80]Epoch 1:  20%|██        | 1/5 [00:00<00:00, 67.44it/s, v_num=80]computing loss
-Epoch 1:  40%|████      | 2/5 [00:00<00:00, 66.30it/s, v_num=80]Epoch 1:  40%|████      | 2/5 [00:00<00:00, 65.95it/s, v_num=80]computing loss
-Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 65.96it/s, v_num=80]Epoch 1:  60%|██████    | 3/5 [00:00<00:00, 65.72it/s, v_num=80]computing loss
-Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 65.43it/s, v_num=80]Epoch 1:  80%|████████  | 4/5 [00:00<00:00, 65.27it/s, v_num=80]computing loss
-Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.60it/s, v_num=80]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.46it/s, v_num=80]Epoch 1: 100%|██████████| 5/5 [00:00<00:00, 65.31it/s, v_num=80]Epoch 1:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]        Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]computing loss
-Epoch 2:  20%|██        | 1/5 [00:00<00:00, 64.91it/s, v_num=80]Epoch 2:  20%|██        | 1/5 [00:00<00:00, 64.27it/s, v_num=80]computing loss
-Epoch 2:  40%|████      | 2/5 [00:00<00:00, 65.82it/s, v_num=80]Epoch 2:  40%|████      | 2/5 [00:00<00:00, 65.52it/s, v_num=80]computing loss
-Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 66.29it/s, v_num=80]Epoch 2:  60%|██████    | 3/5 [00:00<00:00, 66.07it/s, v_num=80]computing loss
-Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 66.63it/s, v_num=80]Epoch 2:  80%|████████  | 4/5 [00:00<00:00, 66.44it/s, v_num=80]computing loss
-Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.85it/s, v_num=80]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.70it/s, v_num=80]Epoch 2: 100%|██████████| 5/5 [00:00<00:00, 65.54it/s, v_num=80]Epoch 2:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]        Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]computing loss
-Epoch 3:  20%|██        | 1/5 [00:00<00:00, 68.84it/s, v_num=80]Epoch 3:  20%|██        | 1/5 [00:00<00:00, 68.06it/s, v_num=80]computing loss
-Epoch 3:  40%|████      | 2/5 [00:00<00:00, 64.73it/s, v_num=80]Epoch 3:  40%|████      | 2/5 [00:00<00:00, 64.40it/s, v_num=80]computing loss
-Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 65.46it/s, v_num=80]Epoch 3:  60%|██████    | 3/5 [00:00<00:00, 65.22it/s, v_num=80]computing loss
-Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 65.44it/s, v_num=80]Epoch 3:  80%|████████  | 4/5 [00:00<00:00, 65.29it/s, v_num=80]computing loss
-Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.73it/s, v_num=80]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.60it/s, v_num=80]Epoch 3: 100%|██████████| 5/5 [00:00<00:00, 65.46it/s, v_num=80]Epoch 3:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]        Epoch 4:   0%|          | 0/5 [00:00<?, ?it/s, v_num=80]computing loss
-Epoch 4:  20%|██        | 1/5 [00:00<00:00, 66.30it/s, v_num=80]Epoch 4:  20%|██        | 1/5 [00:00<00:00, 65.66it/s, v_num=80]computing loss
-Epoch 4:  40%|████      | 2/5 [00:00<00:00, 66.35it/s, v_num=80]Epoch 4:  40%|████      | 2/5 [00:00<00:00, 65.99it/s, v_num=80]computing loss
-Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 65.13it/s, v_num=80]Epoch 4:  60%|██████    | 3/5 [00:00<00:00, 64.92it/s, v_num=80]computing loss
-Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 65.96it/s, v_num=80]Epoch 4:  80%|████████  | 4/5 [00:00<00:00, 65.78it/s, v_num=80]computing loss
-Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 65.73it/s, v_num=80]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 65.60it/s, v_num=80]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 65.45it/s, v_num=80]Epoch 4: 100%|██████████| 5/5 [00:00<00:00, 63.69it/s, v_num=80]
-energy_mse:  tensor(8.8488, dtype=torch.float64)
-force_mse:  tensor(4.2799)
