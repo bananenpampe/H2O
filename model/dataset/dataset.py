@@ -69,23 +69,40 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
     # the features will be computed during the first epoch on the fly but stored in memory
     # if precompute is true, then the features are calculated during instantation
 
-    
+
     def _compute_feats(self, frame, global_species):
-
-        feat = [calculator(frame) for calculator in self.calculators]
-
         # currently we have the issue, that join functions do not tolerate diffent number of blocks.
         # if we have a system that has at least a constant global composition
         # and the features, are SOAP-like we can use this reshaping
         # TODO: at a leater stage we definetly need to change this
+        
+        feat_tmp = []
 
-        perm = combinations_with_replacement(global_species,2)
-        pairs = np.array(list(perm)).reshape(-1,2)
-        pairs_comb = equistore.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
+        for calculator in self.calculators:
+            
+            f = calculator(frame)
 
-        feat = [f.keys_to_properties(["species_neighbor_1","species_neighbor_2"]) for f in feat]
+            if f.keys.names == ['species_center', 'species_neighbor']:
+                #supports radial spectrum  
 
-        return join(feat,axis="properties")  
+                f = f.keys_to_properties(["species_neighbor"])
+                
+                feat_tmp.append(f)
+
+            elif f.keys.names == ['species_center', 'species_neighbor_1', 'species_neighbor_2']:
+                
+                perm = combinations_with_replacement(global_species,2)
+                pairs = np.array(list(perm)).reshape(-1,2)
+                pairs_comb = equistore.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
+
+                f = f.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
+
+                feat_tmp.append(f)
+            
+            else:
+                raise NotImplementedError("The dataset currently only supports radial and radial spectrum features")
+
+        return join(feat_tmp, axis="properties")   
 
     
     def __init__(
