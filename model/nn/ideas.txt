@@ -1,0 +1,6 @@
+
+
+
+I propose a simples structure for an atomistic modeling framework that tries to integrate rascaline, equistore and torch-spex
+
+

@@ -69,6 +69,13 @@ def ase_to_tensormap(
     return properties_to_tensormap(values, positions_gradients, cell_gradients, property_name=energy)
 
 
+def atomic_property_to_tensorblok():
+    pass
+
+# ideally returns a tensormap where the key of blocks determines some membership (central atom species, or group)
+# 
+
+
 def properties_to_tensormap(
     values: List[float],
     positions_gradients: List[np.ndarray] = None,
