@@ -15,8 +15,8 @@ class EquistoreMLPLazy(EquistoreLazyTorchApply):
             """
             return MLP_mean(n_in=n_in,
                             n_out=n_out,
-                            n_hidden=32,
-                            n_hidden_layers=2,
-                            activation=torch.nn.Tanh)
+                            n_hidden=n_hidden,
+                            n_hidden_layers=n_hidden_layers,
+                            activation=activation)
         
         super().__init__(predifined_MLP_factory, n_out)
