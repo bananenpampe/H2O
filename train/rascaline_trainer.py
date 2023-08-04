@@ -8,21 +8,35 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 
 from nn.model import BPNNModel
 from nn.loss import EnergyForceLoss
+from transformer.composition import CompositionTransformer
 
 class BPNNRascalineModule(pl.LightningModule):
     
-    def __init__(self, example_tensormap, energy_transformer, regularization=1e-03):
+    def __init__(self,
+                 example_tensormap,
+                 energy_transformer=CompositionTransformer(),
+                 model = BPNNModel(),
+                 loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.999),
+                 regularization=1e-03):
+        
         super().__init__()
         #print(regularization)
         #self.save_hyperparameters({'l2 reg': regularization})
-        self.model = BPNNModel()
+        self.model = model
         self.model.initialize_weights(example_tensormap)
-        self.loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.999)
+        self.loss_fn = loss_fn
         self.energy_transformer = energy_transformer
         self.regularization = regularization
 
     def forward(self, feats, systems):
         return self.model(feats, systems)
+    
+    def calculate(self, feats, systems):
+        
+        outputs = self(feats, systems)
+        outputs = self.energy_transformer.inverse_transform(systems, outputs)
+
+        return outputs
     
 
     def training_step(self, batch, batch_idx):
