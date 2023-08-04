@@ -136,6 +136,9 @@ class PytorchLightningCalculator:
         energy = out.block(0).values
         forces = -out.block(0).gradient("positions").values
 
+        energy = energy.detach().numpy()
+        forces = forces.detach().numpy()
+
         # for now return 0.0 virial
         virial = cell_matrix * 0.0 
 
