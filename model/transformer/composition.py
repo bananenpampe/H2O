@@ -76,7 +76,7 @@ class CompositionTransformer(torch.nn.Module):
         # feats have shape (n_samples, n_features)
         # targets have shape (n_samples, 1)
 
-        print(targets)
+        #print(targets)
 
         targets = targets.block(0).values
         targets = torch.clone(targets.reshape(-1,1))
@@ -165,7 +165,8 @@ class CompositionTransformer(torch.nn.Module):
 
         #solve a least squares problem using torch tensors
         feats = self._compute_feat(systems)
-        self.weights = self._solve_weights(feats, targets)
+        weights = self._solve_weights(feats, targets)
+        self.weights = torch.nn.Parameter(weights, requires_grad=False)
         #self.weights.requires_grad = False
         # do we have a bias ? -> concatenate ones to the features
         self.is_fitted = True
