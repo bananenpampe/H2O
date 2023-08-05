@@ -29,7 +29,6 @@ import ase.io
 
 torch.set_default_dtype(torch.float64)
 
-
 class PytorchLightningCalculator:
 
     def __init__(self, checkpoint, initial_frame):
@@ -143,19 +142,3 @@ class PytorchLightningCalculator:
         virial = cell_matrix * 0.0 
 
         return energy, forces, virial
-
-if __name__ == "__main__":
-    print("initializing calculator")
-    calc = PytorchLightningCalculator("example.ckpt", "../data/water_converted.xyz")
-
-    energy, forces, virial = calc.calculate(calc.atoms.get_positions(), calc.atoms.get_cell())
-
-    print("energy: ", energy)
-    print("forces: ", forces)
-    print("virial: ", virial)
-
-    import timeit
-
-    print("timing 100 force and energy evaluations")
-    print("{:.2f} s".format(timeit.timeit(lambda: calc.calculate(calc.atoms.get_positions(), calc.atoms.get_cell()), number=100)))
-
