@@ -16,7 +16,7 @@ class BPNNRascalineModule(pl.LightningModule):
                  example_tensormap,
                  energy_transformer=CompositionTransformer(),
                  model = BPNNModel(),
-                 loss_fn = EnergyForceLoss(w_forces=True, force_weight=0.999),
+                 loss_fn = EnergyForceLoss,
                  regularization=1e-03):
         
         super().__init__()
@@ -24,7 +24,14 @@ class BPNNRascalineModule(pl.LightningModule):
         #self.save_hyperparameters({'l2 reg': regularization})
         self.model = model
         self.model.initialize_weights(example_tensormap)
-        self.loss_fn = loss_fn
+        
+        self.loss_fn = loss_fn(w_forces=True,
+                               force_weight=0.999)
+        
+        self.loss_mae = loss_fn(w_forces=True,
+                                force_weight=0.999,
+                                base_loss=torch.nn.L1Loss)
+        
         self.energy_transformer = energy_transformer
         self.regularization = regularization
 
@@ -63,6 +70,10 @@ class BPNNRascalineModule(pl.LightningModule):
     def on_validation_model_eval(self, *args, **kwargs):
         super().on_validation_model_eval(*args, **kwargs)
         torch.set_grad_enabled(True)
+        
+    def on_test_model_eval(self, *args, **kwargs):
+        super().on_test_model_eval(*args, **kwargs)
+        torch.set_grad_enabled(True)
 
     def validation_step(self, batch, batch_idx):
 
@@ -77,6 +88,7 @@ class BPNNRascalineModule(pl.LightningModule):
         outputs = self.energy_transformer.inverse_transform(systems, outputs)
 
         energy_val_mse, forces_val_mse = self.loss_fn.report(outputs, properties)
+        energy_val_mae, forces_val_mae = self.loss_mae.report(outputs, properties)
 
         loss = energy_val_mse + forces_val_mse
 
@@ -85,11 +97,22 @@ class BPNNRascalineModule(pl.LightningModule):
                  batch_size=batch_size,
                  on_epoch=True)
         
+        self.log("val_energy_mae",
+                 torch.clone(energy_val_mae),
+                 batch_size=batch_size,
+                 on_epoch=True)
+        
+        
         self.log("val_energy_mse",
                  torch.clone(energy_val_mse),
                  batch_size=batch_size,
                  on_epoch=True)
         
+        self.log("val_forces_mae",
+                 torch.clone(forces_val_mae),
+                 batch_size=batch_size,
+                 on_epoch=True)
+                
         self.log("val_forces_mse",
                  torch.clone(forces_val_mse), 
                  batch_size=batch_size,
@@ -120,20 +143,68 @@ class BPNNRascalineModule(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
+        
         feats, properties, systems = batch
+
+        energies = properties.block(0).values 
+        forces = properties.block(0).gradient("positions").values
 
         batch_size = len(systems)
 
         outputs = self(feats, systems)
-
         outputs = self.energy_transformer.inverse_transform(systems, outputs)
+
         energy_test_mse, forces_test_mse = self.loss_fn.report(outputs, properties)
+        energy_test_mae, forces_test_mae = self.loss_mae.report(outputs, properties)
 
-        loss = energy_test_mse + forces_test_mse 
-        self.log('test_loss', torch.clone(loss))
+        loss = energy_test_mse + forces_test_mse
 
-        self.log("test_energy_mse", torch.clone(energy_test_mse), batch_size = batch_size)
-        self.log("test_forces_mse", torch.clone(forces_test_mse), batch_size = batch_size)
+        self.log('test_loss',
+                loss.item(),
+                batch_size=batch_size,
+                on_epoch=True)
+
+        self.log("test_energy_mae",
+                torch.clone(energy_test_mae),
+                batch_size=batch_size,
+                on_epoch=True)
+        
+        self.log("test_energy_mse",
+                torch.clone(energy_test_mse),
+                batch_size=batch_size,
+                on_epoch=True)
+        
+        self.log("test_forces_mae",
+                torch.clone(forces_test_mae),
+                batch_size=batch_size,
+                on_epoch=True)
+                
+        self.log("test_forces_mse",
+                torch.clone(forces_test_mse), 
+                batch_size=batch_size,
+                on_epoch=True)
+
+        # log rmse
+        self.log("test_energy_rmse",
+                torch.sqrt(torch.clone(energy_test_mse)),
+                batch_size=batch_size,
+                on_epoch=True)
+        
+        self.log("test_forces_rmse",
+                torch.sqrt(torch.clone(forces_test_mse)),
+                batch_size=batch_size,
+                on_epoch=True)
+
+        # log percent rmse
+        self.log("test_energy_%rmse",
+                torch.sqrt(torch.clone(energy_test_mse))/energies.std(),
+                batch_size=batch_size,
+                on_epoch=True)
+        
+        self.log("test_forces_%rmse",
+                torch.sqrt(torch.clone(forces_test_mse))/forces.std(),
+                batch_size=batch_size,
+                on_epoch=True)
 
         return loss
 
@@ -147,11 +218,15 @@ class BPNNRascalineModule(pl.LightningModule):
     """
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(),lr=1e-3, amsgrad=True)
+        optimizer = torch.optim.Adam(self.parameters(),lr=1e-2, amsgrad=True)
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
-                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=50, factor=0.75, verbose=True),
+                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                                        patience=10,
+                                                                        factor=0.5,
+                                                                        verbose=True,
+                                                                        min_lr=1e-05),
                 "monitor": "val_forces_%rmse",
                 "interval": "epoch",
                 "frequency": 1

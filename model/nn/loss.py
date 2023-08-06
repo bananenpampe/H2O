@@ -19,7 +19,11 @@ class EquistoreLoss(torch.nn.Module):
 
 class EnergyForceLoss(torch.nn.Module):
 
-    def __init__(self, w_forces: bool = True, force_weight: float = 0.95) -> None:
+    def __init__(self,
+                 w_forces: bool = True,
+                 force_weight: float = 0.95,
+                 base_loss: torch.nn.Module = torch.nn.MSELoss) -> None:
+        
         super().__init__()
 
         force_weight = max(0.0, min(1.0, force_weight))
@@ -31,8 +35,8 @@ class EnergyForceLoss(torch.nn.Module):
             self.energy_weight = 1.0
 
         self.w_forces = w_forces
-        self.energy_loss = torch.nn.MSELoss()
-        self.force_loss = torch.nn.MSELoss()
+        self.energy_loss = base_loss()
+        self.force_loss = base_loss()
     
     def report(self, input: equistore.TensorMap, targets: equistore.TensorMap) -> dict:
 

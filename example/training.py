@@ -40,14 +40,19 @@ for n, frame in enumerate(frames_water):
 # select a subset of the frames
 frames_water_train = frames_water[:50]
 frames_water_val = frames_water[50:60]
+frames_water_test = frames_water[60:70]
 
 id_train = []
+id_val = []
 id_test = []
 
 for frame in frames_water_train:
     id_train.append(frame.info["CONVERTED_ID"])
 
 for frame in frames_water_val:
+    id_val.append(frame.info["CONVERTED_ID"])
+
+for frame in frames_water_test:
     id_test.append(frame.info["CONVERTED_ID"])
 
 # --- define the hypers ---
@@ -80,7 +85,7 @@ dataloader = create_rascaline_dataloader(frames_water_train,
                                          precompute = True,
                                          lazy_fill_up = False,
                                          batch_size=4, 
-                                         shuffle=False)
+                                         shuffle=True)
 
 dataloader_val = create_rascaline_dataloader(frames_water_val,
                                          energy_key="TotEnergy",
@@ -90,6 +95,16 @@ dataloader_val = create_rascaline_dataloader(frames_water_val,
                                          precompute = True,
                                          lazy_fill_up = False,
                                          batch_size=len(frames_water_val), 
+                                         shuffle=False)
+
+dataloader_test = create_rascaline_dataloader(frames_water_test,
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
+                                         calculators=calc_sr,
+                                         do_gradients=True,
+                                         precompute = True,
+                                         lazy_fill_up = False,
+                                         batch_size=len(frames_water_test), 
                                          shuffle=False)
 
 # --- create the trainer ---
@@ -125,7 +140,7 @@ module = BPNNRascalineModule(feat, transformer_e)
 #compiled_model = torch.compile(module,fullgraph=True )
 lr_monitor = LearningRateMonitor(logging_interval='epoch')
 
-trainer = Trainer(max_epochs=100,
+trainer = Trainer(max_epochs=1,
                   precision=64,
                   accelerator="cpu",
                   logger=wandb_logger,
@@ -133,7 +148,9 @@ trainer = Trainer(max_epochs=100,
                   gradient_clip_val=100,
                   enable_progress_bar=False,
                   val_check_interval=1.0,
-                  check_val_every_n_epoch=1,)
+                  check_val_every_n_epoch=1,
+                  inference_mode=False)
                   #profiler="simple")
 
 trainer.fit(module, dataloader, dataloader_val)
+trainer.test(module, dataloaders=dataloader_test)
