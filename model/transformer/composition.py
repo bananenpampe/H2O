@@ -197,6 +197,6 @@ class CompositionTransformer(torch.nn.Module):
         self.is_fitted = True
         self.unique_species = get_system_global_composition(systems)
         unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
-        self.unique_labels = equistore.Labels(["species_center"], values=unique_labels)
+        self.unique_labels = equistore.torch.Labels(["species_center"], values=unique_labels)
 
 
