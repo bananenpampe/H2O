@@ -37,6 +37,19 @@ from reduce_over_samples import sum_over_samples, mean_over_samples
 # NOTE: THERE SHOULD BE NO BIAS IN THE LINEAR REGRESSION. IF THE COMPOSITION IS GLOBAL, 
 # RISK IS THAT THE MODEL IS NOT SIZE DEPENDENT
 
+def get_system_global_composition(systems):
+    # returns a torch tensor that contain the unique species in list of systems
+
+    unique_species = []
+
+    for syst in systems:
+        # syst.species is a torch.tensor
+        unique_species.extend(torch.unique(syst.species))
+    
+    unique_species = torch.unique(torch.stack(unique_species).flatten())
+
+    return unique_species
+
 class CompositionTransformer(torch.nn.Module):
     
     def __init__(self, bias=False):
@@ -51,6 +64,8 @@ class CompositionTransformer(torch.nn.Module):
         self.weights = None
         self.requires_features = False
         self.requires_systems = True
+        self.unique_species = None
+        self.unique_labels = None
     
     def _check_fitted(self):
         assert self.is_fitted, "Transformer has to be fitted before calling transform or forward"
@@ -58,7 +73,9 @@ class CompositionTransformer(torch.nn.Module):
     def _compute_feat(self, systems):
         feats = self.calc(systems)
         feats = sum_over_samples(feats, "center")
-        feats = feats.keys_to_properties("species_center")
+
+
+        feats = feats.keys_to_properties(self.unique_labels)
         feats = feats.block(0).values
 
         # one element slice should preserve dimensionality
@@ -118,8 +135,6 @@ class CompositionTransformer(torch.nn.Module):
                                           components=targets.block(0).components,
                                           samples=targets.block(0).samples)
 
-
-
         for gradient_key in targets.block(0).gradients():
             gradient =  targets.block(0).gradient(gradient_key)
             out_block.add_gradient(gradient_key, gradient.copy())
@@ -164,6 +179,9 @@ class CompositionTransformer(torch.nn.Module):
     def fit(self, systems, targets):
 
         #solve a least squares problem using torch tensors
+
+        self.unique_species = get_system_global_composition(systems)
+        self.unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
         feats = self._compute_feat(systems)
         weights = self._solve_weights(feats, targets)
         self.weights = torch.nn.Parameter(weights, requires_grad=False)
