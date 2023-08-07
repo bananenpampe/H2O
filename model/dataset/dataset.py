@@ -82,24 +82,31 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
             
             f = calculator(frame)
 
+            #print(f.keys.names)
+            #print(self.calculators)
+
             if f.keys.names == ['species_center', 'species_neighbor']:
                 #supports radial spectrum  
+                
+                spec = torch.tensor(global_species, dtype=torch.int32).reshape(-1,1)
+                pairs = equistore.torch.Labels(["species_neighbor"], values=spec)
 
-                f = f.keys_to_properties(["species_neighbor"])
+                f = f.keys_to_properties(pairs)
                 
                 feat_tmp.append(f)
 
             elif f.keys.names == ['species_center', 'species_neighbor_1', 'species_neighbor_2']:
                 
                 perm = combinations_with_replacement(global_species,2)
-                pairs = np.array(list(perm)).reshape(-1,2)
-                pairs_comb = equistore.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
+                pairs = torch.tensor(list(perm), dtype=torch.int32).reshape(-1,2)
+                pairs_comb = equistore.torch.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
 
-                f = f.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
+                f = f.keys_to_properties(pairs_comb)
 
                 feat_tmp.append(f)
             
             else:
+                print(f.keys.names)
                 raise NotImplementedError("The dataset currently only supports radial and radial spectrum features")
 
         return join(feat_tmp, axis="properties")   
@@ -418,7 +425,7 @@ def create_rascaline_dataloader(
         dataset,
         batch_size=batch_size,
         shuffle=shuffle,
-        collate_fn=_equistore_collate,
+        collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin_memory,
         drop_last=drop_last,
