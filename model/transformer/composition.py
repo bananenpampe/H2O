@@ -181,11 +181,22 @@ class CompositionTransformer(torch.nn.Module):
         #solve a least squares problem using torch tensors
 
         self.unique_species = get_system_global_composition(systems)
-        self.unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
+        unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
+        self.unique_labels = equistore.Labels(["species_center"], values=unique_labels)
+
         feats = self._compute_feat(systems)
         weights = self._solve_weights(feats, targets)
         self.weights = torch.nn.Parameter(weights, requires_grad=False)
         #self.weights.requires_grad = False
         # do we have a bias ? -> concatenate ones to the features
         self.is_fitted = True
+    
+    def setup(self, systems):
+        assert self.weights is not None, "Transformer has to have weights loaded from statedict before calling setup"
+
+        self.is_fitted = True
+        self.unique_species = get_system_global_composition(systems)
+        unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
+        self.unique_labels = equistore.Labels(["species_center"], values=unique_labels)
+
 
