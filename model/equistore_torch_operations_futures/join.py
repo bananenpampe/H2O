@@ -4,6 +4,7 @@ from typing import List
 
 import numpy as np
 
+import equistore.torch
 from equistore.torch import Labels, TensorBlock, TensorMap
 
 from equistore.operations._utils import _check_same_keys
@@ -282,7 +283,19 @@ def join(
     tensor = TensorMap(keys=keys, blocks=blocks)
 
     if axis == "samples":
-        tensor_joined = tensor.keys_to_samples("tensor")
+        
+
+        #print(tensor.block(0).keys)
+        try:
+            tensor_joined = tensor.keys_to_samples("tensor")
+        except:
+            print(tensor)
+            print(tensor.block(0))
+            #equistore.torch.save( "faulty_tens.map", tensor.copy())
+            for key, block in tensor.items():
+                print(key)
+                print(block)
+            raise ValueError("faulty tensor saved to faulty_tens.map")
     else:
         tensor_joined = tensor.keys_to_properties("tensor")
 
