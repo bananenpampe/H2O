@@ -289,13 +289,8 @@ def join(
         try:
             tensor_joined = tensor.keys_to_samples("tensor")
         except:
-            print(tensor)
-            print(tensor.block(0))
-            #equistore.torch.save( "faulty_tens.map", tensor.copy())
-            for key, block in tensor.items():
-                print(key)
-                print(block)
-            raise ValueError("faulty tensor saved to faulty_tens.map")
+            tensor_joined = tensor.keys_to_samples("tensor")
+
     else:
         tensor_joined = tensor.keys_to_properties("tensor")
 

@@ -109,11 +109,11 @@ dataloader_init = create_rascaline_dataloader(frames_init,
                                          energy_key="potential",
                                          forces_key="force",                                       
                                          calculators=[calc_rs],
-                                         do_gradients= True,
+                                         do_gradients= False,
                                          precompute = True,
                                          lazy_fill_up = False,
                                          collate_fn = union_collate_fn,
-                                         batch_size=len(frames_water_train), 
+                                         batch_size=len(frames_init), 
                                          shuffle=False)
 
 dataloader = create_rascaline_dataloader(frames_water_train,
@@ -171,7 +171,7 @@ print("train split:",id_train)
 print("test_split:",id_test)
 print("seed", SEED)
 
-feat, prop, syst = next(iter(dataloader))
+
 
 """
 for batch in dataloader:
@@ -191,6 +191,7 @@ _, prop, syst = next(iter(dataloader_init))
 transformer_e = CompositionTransformer()
 transformer_e.fit(syst, prop)
 
+feat, prop, syst = next(iter(dataloader))
 # define the trainer
 module = BPNNRascalineModule(feat, transformer_e)
 
