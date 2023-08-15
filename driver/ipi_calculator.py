@@ -98,14 +98,13 @@ class PytorchLightningCalculator:
         
         if "energy_transformer.weights" in checkpoint.keys():
             print("found transformer weights")
-            transformer_weights = checkpoint.pop("energy_transformer.weights")
         else:
             print("setting transformer weights to 0.")
             
             checkpoint["energy_transformer.weights"] = torch.nn.Parameter(torch.tensor([0. for i in self.dataset.all_species]).reshape(-1,1),
                                                                     requires_grad=False)
              
-        self.model.energy_transformer.weights = transformer_weights 
+        self.model.energy_transformer.weights = checkpoint["energy_transformer.weights"]
         self.model.load_state_dict(checkpoint)
         self.model.energy_transformer.is_fitted = True
         self.model.energy_transformer.unique_labels = Labels(["species_center"], values=torch.tensor(self.dataset.all_species).reshape(-1,1))
