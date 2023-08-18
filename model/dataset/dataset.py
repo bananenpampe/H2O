@@ -105,6 +105,9 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
                 feat_tmp.append(f)
             
+            elif f.keys.names == ['species_center']:
+                feat_tmp.append(f)
+            
             else:
                 print(f.keys.names)
                 raise NotImplementedError("The dataset currently only supports radial and radial spectrum features")
@@ -115,8 +118,8 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         frames: Union[ase.Atoms,List[ase.Atoms]],
-        calculators: Union[rascaline.torch.calculators.CalculatorModule,\
-                           List[rascaline.torch.calculators.CalculatorModule]],
+        calculators: Union[rascaline.torch.calculators.CalculatorBase,\
+                           List[rascaline.torch.calculators.CalculatorBase]],
         hypers: Union[dict,List[dict]] = None,
         do_gradients: bool = False,
         do_cell_gradients: bool = False,
@@ -155,7 +158,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
             frames = [frames]
         
         # TODO: more logic to check for calculators?
-        if isinstance(calculators, rascaline.torch.calculators.CalculatorModule):
+        if isinstance(calculators, rascaline.torch.calculators.CalculatorBase):
             #print(type(calculators))
             print("single calculator passed")
             #TODO: write test for this
@@ -380,7 +383,7 @@ def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.Ten
 
 def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
-    calculators: Union[rascaline.torch.calculators.CalculatorModule,List[rascaline.torch.calculators.CalculatorModule]],
+    calculators: Union[rascaline.torch.calculators.CalculatorBase,List[rascaline.torch.calculators.CalculatorBase]],
     do_gradients: bool = False,
     precompute: bool = False,
     lazy_fill_up: bool = True,
