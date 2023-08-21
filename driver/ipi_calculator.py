@@ -28,6 +28,9 @@ from dataset.dataset import create_rascaline_dataloader, RascalineAtomisticDatas
 import ase.io
 from equistore.torch import Labels
 from torch.autograd import grad
+import rascaline.torch
+from rascaline.torch.utils import PowerSpectrum
+import rascaline.torch
 
 torch.set_default_dtype(torch.float64)
 
@@ -41,6 +44,10 @@ class PytorchLightningCalculator:
         self.atoms = ase.io.read(initial_frame, index="0")
         
         checkpoint = torch.load(checkpoint)['state_dict']
+
+
+
+
 
         hypers_ps = {
             "cutoff": 5.,
@@ -74,10 +81,41 @@ class PytorchLightningCalculator:
         calc_rs = rascaline.torch.SoapRadialSpectrum(**hypers_rs)
         calc_ps = rascaline.torch.SoapPowerSpectrum(**hypers_ps)
 
+        hypers_sr_spex = {
+            "cutoff": 3.0,
+            "max_radial": 4,
+            "max_angular": 1,
+            "atomic_gaussian_width": 0.3,
+            "center_atom_weight": 1.0,
+            "radial_basis": {
+                "Gto": {},
+            },
+            "cutoff_function": {
+                "ShiftedCosine": {"width":0.25},
+            },
+        }
+
+        hypers_lr = {
+            "cutoff": 3.0,
+            "max_radial": 4,
+            "max_angular": 1,
+            "atomic_gaussian_width": 1.25,
+            "center_atom_weight": 1.,
+            "potential_exponent":1,
+            "radial_basis": {
+                "Gto": {},
+            },
+        }
+
+        calc_sr_spex = rascaline.torch.SphericalExpansion(**hypers_sr_spex)
+        calc_lr = rascaline.torch.LodeSphericalExpansion(**hypers_lr)
+
+        calc_lode = PowerSpectrum(calc_sr_spex,calc_lr)
+
         self.dataset = RascalineAtomisticDataset(self.atoms,
                                          energy_key="potential",
                                          forces_key="force",
-                                         calculators=[calc_rs, calc_ps],
+                                         calculators=[calc_rs, calc_ps, calc_lode],
                                          do_gradients=True,
                                          precompute = True,
                                          lazy_fill_up = False)
@@ -90,9 +128,9 @@ class PytorchLightningCalculator:
         self.model = BPNNRascalineModule(\
         example_tensormap=feat,\
         model=BPNNModel(\
-        interaction=BPNNInteraction(n_out=1, activation=torch.nn.SiLU, n_hidden=64)))
+        interaction=BPNNInteraction(n_out=1, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64)))
                 
-
+        print(self.model)
         print(self.model.state_dict().keys())
         # ----- load model from checkpoint -----
         
@@ -105,6 +143,7 @@ class PytorchLightningCalculator:
                                                                     requires_grad=False)
              
         self.model.energy_transformer.weights = checkpoint["energy_transformer.weights"]
+        checkpoint.pop("energy_transformer.weights")
         self.model.load_state_dict(checkpoint)
         self.model.energy_transformer.is_fitted = True
         self.model.energy_transformer.unique_labels = Labels(["species_center"], values=torch.tensor(self.dataset.all_species).reshape(-1,1))
@@ -118,8 +157,8 @@ class PytorchLightningCalculator:
         self.atoms.set_cell(cell_matrix)
 
         forward_frame = rascaline.torch.systems_to_torch(self.atoms,
-                                                         positions_requires_grad=True,
-                                                         cell_requires_grad=True)
+                                                         positions_requires_grad=True,)
+                                                         #cell_requires_grad=True)
         
         feat_forward = self.dataset._compute_feats(forward_frame,
                                                    self.dataset.all_species)
@@ -140,6 +179,7 @@ class PytorchLightningCalculator:
         energy = energy.detach().numpy()
         forces = forces.detach().numpy()
 
+        """
         outputs = list(torch.ones_like(out.block(0).values))
 
         dEdc = grad(outputs=list(out.block(0).values),
@@ -148,7 +188,10 @@ class PytorchLightningCalculator:
                       create_graph=True,
                       retain_graph=True)[0]
         
-        virial = -dEdc.detach().numpy().T @ cell_matrix
+        #virial = -dEdc.detach().numpy().T @ cell_matrix
         virial = 0.5 * (virial + virial.T)
+        """
+
+        virial = cell_matrix * 0.0
 
         return energy, forces, virial 
