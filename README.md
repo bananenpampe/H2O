@@ -24,10 +24,19 @@ ase_frames = load_phase_diagram_H2O()
 
 ## Install
 
-get rascaline + rascaline-torch + a cpu only torch version
+Begin with a fresh conda environment, (ie python 3.10) and activate the environment
+conda create --name H2O python=3.10
+
+Install rust, if it is not already installed:
+conda install -c conda-forge rust
+
+
+get rascaline + rascaline-torch + a cpu only torch version and metatensor, by running the three commands:
 
 ```
 pip install --extra-index-url https://download.pytorch.org/whl/cpu git+https://github.com/luthaf/rascaline#subdirectory=python/rascaline-torch
+pip install --extra-index-url https://download.pytorch.org/whl/cpu git+https://github.com/lab-cosmo/metatensor#subdirectory=python/metatensor-torch
+pip install git+https://github.com/lab-cosmo/metatensor
 ```
 
 ## Train a model:
