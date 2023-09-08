@@ -84,6 +84,15 @@ make
 
 ```
 
+You might want to add the bash script to your .bash_profile that adds ipi to your system path
+
+```
+add to .bashrc
+LOCATION_OF_IPI_REPOSITORY/i-pi/env.sh
+```
+
+
+
 
 
 ## Train a model:
@@ -100,6 +109,21 @@ python example/training.py
 ```
 
 ## Run MD
+
+In order to run an MD check out the example in the `H2O/simulations/test/`.
+It comes with pretrained weights of a liquid water potential and a starting configuration.
+run:
+
+```
+nohup bash run.sh &
+```
+
+You can run the analysis notebook to visualize th outputs of the simulation and the trajectory.
+
+```
+jupyter-lab analysis.ipynb
+```
+
 
 
 ## Tests:
