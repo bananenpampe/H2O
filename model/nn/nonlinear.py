@@ -1,9 +1,9 @@
 
-from .modules import EquistoreLazyTorchApply
+from .modules import metatensorLazyTorchApply
 from .mlp import MLP_mean
 import torch
 
-class EquistoreMLPLazy(EquistoreLazyTorchApply):
+class metatensorMLPLazy(metatensorLazyTorchApply):
     
     def __init__(self, n_out: int,
                  n_hidden: int = 32,

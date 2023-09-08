@@ -17,18 +17,29 @@ import torch
 import ase.io
 import torch._dynamo
 import traceback as tb
-from equistore_torch_operations_futures.collate_fn import union_collate_fn
+from metatensor_torch_operations_futures.collate_fn import union_collate_fn
 import random
 
 from transformer.composition import CompositionTransformer
 from pytorch_lightning.callbacks import LearningRateMonitor
 
+from rascaline.torch.utils import PowerSpectrum
+
+#API is:
+"""
+class PowerSpectrum(torch_nn_module):
+    def __init__(
+        self,
+        calculator_1: CalculatorBase,
+        calculator_2: Optional[CalculatorBase] = None,
+    ):
+"""
 
 #default type is float64
 torch.set_default_dtype(torch.float64)
 
 # --- load the data ---
-frames_water = ase.io.read("../data/nacl_train_sel.xyz", index="2000:")
+frames_water = ase.io.read("../data/nacl_train_sel.xyz", index=":500")
 for frame in frames_water: frame.calc = None
 
 """
@@ -161,7 +172,7 @@ with open("wandb.txt", "r") as f:
     wandb_api_key = f.readline()
 
 wandb.login(key=wandb_api_key)
-wandb_logger = WandbLogger(project="H2O-NaCl",log_model=True)
+wandb_logger = WandbLogger(project="debug-runs",log_model=True)
 wandb_logger.experiment.config["key"] = wandb_api_key
 
 # log the descriptor hyperparameters
@@ -198,7 +209,7 @@ module = BPNNRascalineModule(feat, transformer_e)
 #compiled_model = torch.compile(module,fullgraph=True )
 lr_monitor = LearningRateMonitor(logging_interval='epoch')
 
-trainer = Trainer(max_epochs=100,
+trainer = Trainer(max_epochs=5,
                   precision=64,
                   accelerator="cpu",
                   logger=wandb_logger,

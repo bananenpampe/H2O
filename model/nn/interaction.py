@@ -2,9 +2,9 @@
 # TODO: beginn with a simple linear layer
 
 import torch
-import equistore
-from .linear import EquistoreLinearLazy
-from .nonlinear import EquistoreMLPLazy
+import metatensor
+from .linear import metatensorLinearLazy
+from .nonlinear import metatensorMLPLazy
 
 # Interaction layers 
 
@@ -16,19 +16,19 @@ class Interaction(torch.nn.Module):
         super().__init__()
         self.interaction = None
     
-    def forward(self, inputs: equistore.TensorMap):
+    def forward(self, inputs: metatensor.TensorMap):
         return self.interaction(inputs)
 
 class LinearInteraction(torch.nn.Module):
     
     def __init__(self, n_in, n_out):
         super().__init__()
-        self.interaction = EquistoreLinearLazy(n_out)
+        self.interaction = metatensorLinearLazy(n_out)
     
-    def initialize_weights(self, inputs: equistore.TensorMap):
+    def initialize_weights(self, inputs: metatensor.TensorMap):
         self.model.initialize_weights(inputs)
 
-    def forward(self, inputs: equistore.TensorMap):
+    def forward(self, inputs: metatensor.TensorMap):
         return self.interaction(inputs)
 
 class BPNNInteraction(torch.nn.Module):
@@ -40,13 +40,13 @@ class BPNNInteraction(torch.nn.Module):
         
         super().__init__()
         
-        self.model = EquistoreMLPLazy(n_out, 
+        self.model = metatensorMLPLazy(n_out, 
                                       n_hidden, 
                                       n_hidden_layers, 
                                       activation)
 
-    def initialize_weights(self, inputs: equistore.TensorMap):
+    def initialize_weights(self, inputs: metatensor.TensorMap):
         self.model.initialize_weights(inputs)
     
-    def forward(self, inputs: equistore.TensorMap):
+    def forward(self, inputs: metatensor.TensorMap):
         return self.model(inputs)

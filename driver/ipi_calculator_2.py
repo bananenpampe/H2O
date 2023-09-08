@@ -36,17 +36,76 @@ torch.set_default_dtype(torch.float64)
 
 class PytorchLightningCalculator:
 
-    def __init__(self, checkpoint, initial_frame):
+    def __init__(self, checkpoint, initial_frame, hypers):
 
         #uses initial frame to initialize model ?
         # should be changed to get a fully pickeled model, imo
         
         self.atoms = ase.io.read(initial_frame, index="0")
-        
         checkpoint = torch.load(checkpoint)['state_dict']
 
+        #open json file with hypers
+        #
+        # hypers contain the following:
+        # {"SoapRadialSpectrum_1",""} etc?
+        #
+
+        self.calculators = []
+
+        # ----- initialize calc ------
+
+        # ----- initialize model -----
+        model_hypers = hypers["model"]
+        N_HIDDEN = model_hypers["n_hidden"]
+        N_LAYERS = model_hypers["n_layers"]
+        ACTIVATION = model_hypers["activation"]
 
 
+        for key, hyp_ in hypers["feat"].items():
+            
+            if "SoapRadialSpectrum" in key:
+                calc = rascaline.torch.SoapRadialSpectrum(**hyp_)
+            
+            elif "SoapPowerSpectrum" in key:
+                calc = rascaline.torch.SoapPowerSpectrum(**hyp_)
+            
+            elif "PowerSpectrum" in key:
+                 tmp_calcs = []
+                 for key_, hyp__ in hyp_.items():
+                    if "SphericalExpansion" in key_:
+                        calc = rascaline.torch.SphericalExpansion(**hyp__)
+                    elif "LodeSphericalExpansion" in key_:
+                        calc = rascaline.torch.LodeSphericalExpansion(**hyp__)
+                    else:
+                        raise NotImplementedError("calculator not implemented")
+                    tmp_calcs.append(calc)
+                
+                calc = PowerSpectrum(*tmp_calcs)
+            else:
+                raise NotImplementedError("calculator not implemented")
+            
+            self.calculators.append(calc)
+
+
+
+
+
+
+
+
+        if "SoapRadialSpectrum" in hypers.keys():
+            hypers_rs = hypers["rs"]
+
+        
+        if "ps" in hypers.keys():
+            hypers_ps = hypers["ps"]
+        
+
+
+
+        for key in hypers.keys():
+            if "lode" in key:
+                hypers_lode = hypers[key]
 
 
         hypers_ps = {
@@ -81,7 +140,6 @@ class PytorchLightningCalculator:
         calc_rs = rascaline.torch.SoapRadialSpectrum(**hypers_rs)
         calc_ps = rascaline.torch.SoapPowerSpectrum(**hypers_ps)
 
-        """
         hypers_sr_spex = {
             "cutoff": 3.0,
             "max_radial": 4,
@@ -112,12 +170,11 @@ class PytorchLightningCalculator:
         calc_lr = rascaline.torch.LodeSphericalExpansion(**hypers_lr)
 
         calc_lode = PowerSpectrum(calc_sr_spex,calc_lr)
-        """
 
         self.dataset = RascalineAtomisticDataset(self.atoms,
                                          energy_key="potential",
                                          forces_key="force",
-                                         calculators=[calc_rs, calc_ps],
+                                         calculators=[calc_rs, calc_ps, calc_lode],
                                          do_gradients=True,
                                          precompute = True,
                                          lazy_fill_up = False)
@@ -130,7 +187,7 @@ class PytorchLightningCalculator:
         self.model = BPNNRascalineModule(\
         example_tensormap=feat,\
         model=BPNNModel(\
-        interaction=BPNNInteraction(n_out=1, n_hidden_layers=3, activation=torch.nn.SiLU, n_hidden=256)))
+        interaction=BPNNInteraction(n_out=1, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64)))
                 
         print(self.model)
         print(self.model.state_dict().keys())

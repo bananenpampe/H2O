@@ -11,7 +11,7 @@
 # write a model class
 
 import torch
-import equistore
+import metatensor
 from .feature import UnitFeatures
 from .interaction import BPNNInteraction
 from .aggregation import StructureWiseAggregation, BPNNStructureWiseAggregation
@@ -32,7 +32,7 @@ class BPNNModel(torch.nn.Module):
         self.aggregation = aggregation
         self.response = response
 
-    def initialize_weights(self, inputs: equistore.TensorMap):
+    def initialize_weights(self, inputs: metatensor.TensorMap):
     
         self.feature.initialize_weights(inputs)
         inputs = self.feature(inputs)

@@ -10,7 +10,7 @@ import ase
 import numpy as np
 import rascaline
 import torch
-import equistore
+import metatensor
 
 
 class TestJoin(unittest.TestCase):

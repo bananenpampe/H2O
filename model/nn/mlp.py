@@ -1,9 +1,9 @@
 # TODO: write a generic MLP, takes n_hidden_layers, n_in, n_out, activation 
 # and number of hidden neurons as either int, or tuple (64,64,32)
-# gets equistore TensorMap and returns equistore TensorMap
+# gets metatensor TensorMap and returns metatensor TensorMap
 # TODO: write a block-wise mlp, that applies an MLP to each TensorBlock of the input
 # either takes n_in as fixed across all blocks, or as a tuple (n_1,n_2,n_3) ?
-# gets equistore TensorMap and returns equistore TensorMap
+# gets metatensor TensorMap and returns metatensor TensorMap
 # TODO: write a BPNN interaction that assumes that block_keys are center species
 
 import torch

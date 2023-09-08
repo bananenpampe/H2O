@@ -17,18 +17,18 @@
 import rascaline
 import rascaline.torch
 import numpy as np
-import equistore
+import metatensor
 
-from equistore.torch import TensorMap, TensorBlock
+from metatensor.torch import TensorMap, TensorBlock
 
 import torch
 
 import sys 
 import os
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equistore_torch_operations_futures"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "metatensor_torch_operations_futures"))
 
-from reduce_over_samples import sum_over_samples, mean_over_samples
+from metatensor.torch import sum_over_samples, mean_over_samples
 
 #TODO: make an abstract class that defines common behaviours ie check_fitted etc.
 
@@ -114,7 +114,7 @@ class CompositionTransformer(torch.nn.Module):
         
         return self.transform(systems, targets)
         
-        #assume that targets already is a equistore.TensorMap ?
+        #assume that targets already is a metatensor.TensorMap ?
 
 
     def transform(self, systems, targets):
@@ -135,8 +135,7 @@ class CompositionTransformer(torch.nn.Module):
                                           components=targets.block(0).components,
                                           samples=targets.block(0).samples)
 
-        for gradient_key in targets.block(0).gradients():
-            gradient =  targets.block(0).gradient(gradient_key)
+        for gradient_key, gradient in targets.block(0).gradients():
             out_block.add_gradient(gradient_key, gradient.copy())
 
         out_map = TensorMap(targets.keys, [out_block])
@@ -165,10 +164,9 @@ class CompositionTransformer(torch.nn.Module):
                                           components=targets.block(0).components,
                                           samples=targets.block(0).samples)
 
-        #out_map = equistore.TensorMap(targets.keys, [out_block])
+        #out_map = metatensor.TensorMap(targets.keys, [out_block])
 
-        for gradient_key in targets.block(0).gradients():
-            gradient =  targets.block(0).gradient(gradient_key)
+        for gradient_key, gradient in targets.block(0).gradients():
             out_block.add_gradient(gradient_key, gradient.copy())
 
         out_map = TensorMap(targets.keys, [out_block])
@@ -182,7 +180,7 @@ class CompositionTransformer(torch.nn.Module):
 
         self.unique_species = get_system_global_composition(systems)
         unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
-        self.unique_labels = equistore.torch.Labels(["species_center"], values=unique_labels)
+        self.unique_labels = metatensor.torch.Labels(["species_center"], values=unique_labels)
 
         feats = self._compute_feat(systems)
         weights = self._solve_weights(feats, targets)
@@ -197,6 +195,6 @@ class CompositionTransformer(torch.nn.Module):
         self.is_fitted = True
         self.unique_species = get_system_global_composition(systems)
         unique_labels = torch.tensor(self.unique_species, dtype=torch.int32).reshape(-1,1)
-        self.unique_labels = equistore.torch.Labels(["species_center"], values=unique_labels)
+        self.unique_labels = metatensor.torch.Labels(["species_center"], values=unique_labels)
 
 

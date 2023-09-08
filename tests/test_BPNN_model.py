@@ -14,18 +14,18 @@ import ase.io
 import numpy as np
 import rascaline
 import torch
-import equistore
+import metatensor
 
 
 import rascaline_torch
 import rascaline
-from nn.linear import EquistoreLinearLazy
+from nn.linear import metatensorLinearLazy
 from nn.model import BPNNModel
 from nn.interaction import BPNNInteraction
 from nn.feature import UnitFeatures
 from nn.aggregation import BPNNStructureWiseAggregation
 from nn.response import ForceRespone
-from nn.nonlinear import EquistoreMLPLazy
+from nn.nonlinear import metatensorMLPLazy
 from nn.soap import compute_power_spectrum
 
 
@@ -72,7 +72,7 @@ class TestProperInit(unittest.TestCase):
         assert isinstance(model.interaction, BPNNInteraction)
         assert isinstance(model.aggregation, BPNNStructureWiseAggregation)
         assert isinstance(model.response, ForceRespone)
-        assert isinstance(model.interaction.model, EquistoreMLPLazy)
+        assert isinstance(model.interaction.model, metatensorMLPLazy)
         
         #assert model.interaction.model.n_hidden_layers == 2
         #assert model.interaction.model.n_hidden == 32
@@ -97,7 +97,7 @@ class TestProperInit(unittest.TestCase):
         assert isinstance(model.interaction, BPNNInteraction)
         assert isinstance(model.aggregation, BPNNStructureWiseAggregation)
         assert isinstance(model.response, ForceRespone)
-        assert isinstance(model.interaction.model, EquistoreMLPLazy)
+        assert isinstance(model.interaction.model, metatensorMLPLazy)
 
         assert model.aggregation.mode == "sum"
         assert model.aggregation.sum_over == ["species_center","center"]
@@ -238,7 +238,7 @@ class TestProperInit(unittest.TestCase):
         X = compute_power_spectrum(X, naming_convention="soap")
         X = X.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
-        X = equistore.join([X, X], axis="properties")
+        X = metatensor.join([X, X], axis="properties")
 
         model = BPNNModel()
         model.initialize_weights(X)
@@ -261,13 +261,13 @@ class TestProperInit(unittest.TestCase):
         X_2 = compute_power_spectrum(X_2, naming_convention="soap")
         X_2 = X_2.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
-        X_2 = equistore.join([X_2, X_2], axis="properties")
+        X_2 = metatensor.join([X_2, X_2], axis="properties")
 
         X_3 = calculator(frames_3)
         X_3 = compute_power_spectrum(X_3, naming_convention="soap")
         X_3 = X_3.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
-        X_3 = equistore.join([X_3, X_3], axis="properties")
+        X_3 = metatensor.join([X_3, X_3], axis="properties")
 
         E_2 = model.forward(X_2, frames_2)
         E_2 = E_2.block(0).values
@@ -305,7 +305,7 @@ class TestProperInit(unittest.TestCase):
         X_lr = compute_power_spectrum(X_lr, naming_convention="soap")
         X_lr = X_lr.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
-        X = equistore.join([X_sr, X_lr], axis="properties")
+        X = metatensor.join([X_sr, X_lr], axis="properties")
         
         model = BPNNModel()
         model.initialize_weights(X)
@@ -331,7 +331,7 @@ class TestProperInit(unittest.TestCase):
 
         X_lr_2 = compute_power_spectrum(X_lr_2, naming_convention="soap")
 
-        X_2 = equistore.join([X_sr_2, X_lr_2], axis="properties")
+        X_2 = metatensor.join([X_sr_2, X_lr_2], axis="properties")
         X_2 = X_2.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
         X_sr_3 = calculator_sr(frames_3)
@@ -340,7 +340,7 @@ class TestProperInit(unittest.TestCase):
         X_sr_3 = compute_power_spectrum(X_sr_3, naming_convention="soap")
         X_lr_3 = compute_power_spectrum(X_lr_3, naming_convention="soap")
 
-        X_3 = equistore.join([X_sr_3, X_lr_3], axis="properties")
+        X_3 = metatensor.join([X_sr_3, X_lr_3], axis="properties")
         X_3 = X_3.keys_to_properties(["species_neighbor_1","species_neighbor_2"])
 
         E_2 = model.forward(X_2, frames_2)

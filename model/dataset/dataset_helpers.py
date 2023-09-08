@@ -1,6 +1,5 @@
 import ase
 import numpy as np
-import equistore
 
 # get global number of species
 def get_global_unique_species(frames):

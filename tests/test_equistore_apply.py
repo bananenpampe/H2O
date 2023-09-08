@@ -13,11 +13,11 @@ import ase.io
 import numpy as np
 import rascaline
 import torch
-import equistore
+import metatensor
 
 import rascaline_torch
 import rascaline
-from nn.linear import EquistoreLinearLazy
+from nn.linear import metatensorLinearLazy
 
 
 
@@ -26,7 +26,7 @@ torch.set_default_dtype(d=torch.float64)
 
 
 
-class TestEquistore(unittest.TestCase):
+class Testmetatensor(unittest.TestCase):
 
     def test_forward_pass(self):
 
@@ -38,14 +38,14 @@ class TestEquistore(unittest.TestCase):
         X = calc(frames_t)
 
 
-        layer = EquistoreLinearLazy(n_out=10)
+        layer = metatensorLinearLazy(n_out=10)
         layer.initialize_weights(X)
         X = layer(X)
 
         # now the blocks in X have different dimensionality
         # (they all should have 10 feat)
 
-        layer = EquistoreLinearLazy(n_out=10)
+        layer = metatensorLinearLazy(n_out=10)
         layer.initialize_weights(X)
         X = layer(X)
 
@@ -62,7 +62,7 @@ class TestEquistore(unittest.TestCase):
         calc = rascaline_torch.Calculator(rascaline.SoapPowerSpectrum(**hypers_sr))
 
         X = calc(frames_t)
-        layer = EquistoreLinearLazy(n_out=10)
+        layer = metatensorLinearLazy(n_out=10)
         layer.initialize_weights(X)
         X = layer(X)
 
@@ -77,10 +77,10 @@ class TestEquistore(unittest.TestCase):
         calc = rascaline_torch.Calculator(rascaline.SoapPowerSpectrum(**hypers_sr))
 
         X = calc(frames_t)
-        layer = EquistoreLinearLazy(n_out=10)
+        layer = metatensorLinearLazy(n_out=10)
         layer.initialize_weights(X)
 
-        X = equistore.join([X,X],axis="samples")
+        X = metatensor.join([X,X],axis="samples")
         X = layer(X)
 
     def test_forward_pass_different_blocks(self):
@@ -91,7 +91,7 @@ class TestEquistore(unittest.TestCase):
 
         X = calc(frames_t)
 
-        layer = EquistoreLinearLazy(n_out=10)
+        layer = metatensorLinearLazy(n_out=10)
         layer.initialize_weights(X)
 
         for frame in frames_t:
@@ -107,7 +107,7 @@ class TestEquistore(unittest.TestCase):
         X = calc(frames_t)
 
         with self.assertRaises(AssertionError):
-            layer = EquistoreLinearLazy(n_out=10)
+            layer = metatensorLinearLazy(n_out=10)
             layer.initialize_weights(X)
 
 

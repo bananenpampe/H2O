@@ -1,13 +1,13 @@
 import torch
 from  .utils import l_to_str
-from equistore.torch import TensorMap, TensorBlock, Labels
+from metatensor.torch import TensorMap, TensorBlock, Labels
 
 
 ### There should be a GeneralTorchApply that accepts either a TensorMap or a dict of functions that 
 ### can be applied during application (there should be a unit apply)
 # unit apply passes through
 
-class EquistoreLazyTorchApply(torch.nn.Module):
+class metatensorLazyTorchApply(torch.nn.Module):
     """ Base class that sets up whatever torch.nn.Module 
     that takes as input a well-defined input and output dimension 
     and makes it compatible such that a TensorMap can be passed as input

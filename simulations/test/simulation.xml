@@ -1,9 +1,9 @@
 <simulation verbosity= "low">
 <output prefix="BPNN-H2O-md">
-<properties stride="200" filename="out">  [ step, time{picosecond},  conserved{electronvolt},
+<properties stride="2" filename="out">  [ step, time{picosecond},  conserved{electronvolt},
         temperature{kelvin}, kinetic_md{electronvolt}, potential{electronvolt}, pressure_md{bar}, volume{angstrom3},
         ensemble_temperature{kelvin}, cell_abcABC] </properties>
-        <trajectory filename="xc" stride="200" cell_units="angstrom"> x_centroid{angstrom} </trajectory>
+        <trajectory filename="xc" stride="2" cell_units="angstrom"> x_centroid{angstrom} </trajectory>
         <checkpoint stride="1000"/>
         </output>
         <total_steps> 2000000 </total_steps>

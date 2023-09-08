@@ -41,7 +41,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equisolve_futures"))
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "equistore_torch_operations_futures"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "metatensor_torch_operations_futures"))
 
 import ase
 import torch
@@ -51,8 +51,8 @@ from convert_torch import ase_to_tensormap
 
 from typing import List, Union, Tuple
 import rascaline
-import equistore
-import equistore.torch
+import metatensor
+import metatensor.torch
 import rascaline.torch
 
 import copy
@@ -89,7 +89,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                 #supports radial spectrum  
                 
                 spec = torch.tensor(global_species, dtype=torch.int32).reshape(-1,1)
-                pairs = equistore.torch.Labels(["species_neighbor"], values=spec)
+                pairs = metatensor.torch.Labels(["species_neighbor"], values=spec)
 
                 f = f.keys_to_properties(pairs)
                 
@@ -99,7 +99,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                 
                 perm = combinations_with_replacement(global_species,2)
                 pairs = torch.tensor(list(perm), dtype=torch.int32).reshape(-1,2)
-                pairs_comb = equistore.torch.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
+                pairs_comb = metatensor.torch.Labels(["species_neighbor_1","species_neighbor_2"], values=pairs)
 
                 f = f.keys_to_properties(pairs_comb)
 
@@ -263,7 +263,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                 
                 if on_disk:
                     #save the feats to disk
-                    equistore.save(os.path.join("./tmp", f"feat_{i}.npz"), feat)
+                    metatensor.save(os.path.join("./tmp", f"feat_{i}.npz"), feat)
                 else: 
                     self.feats[i] = feat
 
@@ -294,7 +294,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         if self.precompute:
             
             if self.on_disk:
-                feats = equistore.load(os.path.join("./tmp", f"feat_{idx}.npz"))
+                feats = metatensor.load(os.path.join("./tmp", f"feat_{idx}.npz"))
             else:
                 feats = self.feats[idx]
 
@@ -361,7 +361,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
 
 
-def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.TensorMap, rascaline.torch.System]]):
+def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.TensorMap, rascaline.torch.System]]):
     #TODO: add renumbering of the tensor maps, (idx)
 
     feats = [tensor_map[0] for tensor_map in tensor_maps]
@@ -378,7 +378,7 @@ def _equistore_collate(tensor_maps: List[Tuple[equistore.TensorMap,equistore.Ten
     ##for now do densification on the fly 
      
     return join(feats, axis="samples"), join(properties, axis="samples"), systems
-#equistore.join(properties, axis="samples"), systems
+#metatensor.join(properties, axis="samples"), systems
 
 
 def create_rascaline_dataloader(
@@ -400,7 +400,7 @@ def create_rascaline_dataloader(
     generator = None,
     prefetch_factor = None,
     persistent_workers: bool = False,
-    collate_fn = _equistore_collate,
+    collate_fn = _metatensor_collate,
     sampler = None,
     batch_sampler = None,
     dataset_kwargs = None,

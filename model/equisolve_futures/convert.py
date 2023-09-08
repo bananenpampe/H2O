@@ -6,13 +6,13 @@
 # Released under the BSD 3-Clause "New" or "Revised" License
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Functions for converting instances into an :class:`equistore.TensorMap`."""
+"""Functions for converting instances into an :class:`metatensor.TensorMap`."""
 
 from typing import List
 
 import ase
 import numpy as np
-from equistore import Labels, TensorBlock, TensorMap
+from metatensor import Labels, TensorBlock, TensorMap
 
 def ase_to_tensormap(
     frames: List[ase.Atoms],
@@ -22,7 +22,7 @@ def ase_to_tensormap(
 ) -> TensorMap:
     
     """Store informations from :class:`ase.Atoms` 
-    in a :class:`equistore.TensorMap`.
+    in a :class:`metatensor.TensorMap`.
 
     :param frames:
         ase.Atoms or list of ase.Atoms
@@ -69,6 +69,13 @@ def ase_to_tensormap(
     return properties_to_tensormap(values, positions_gradients, cell_gradients, property_name=energy)
 
 
+def atomic_property_to_tensorblok():
+    pass
+
+# ideally returns a tensormap where the key of blocks determines some membership (central atom species, or group)
+# 
+
+
 def properties_to_tensormap(
     values: List[float],
     positions_gradients: List[np.ndarray] = None,
@@ -76,7 +83,7 @@ def properties_to_tensormap(
     is_structure_property: bool = True,
     property_name: str = "property",
 ) -> TensorMap:
-    """Create a :class:`equistore.TensorMap` from array like properties.
+    """Create a :class:`metatensor.TensorMap` from array like properties.
 
     :param values:
         array like object of dimension N, for example the energies for each structure

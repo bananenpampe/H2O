@@ -17,11 +17,11 @@ import ase.io
 import numpy as np
 import rascaline
 import torch
-import equistore
+import metatensor
 
 import rascaline_torch
 import rascaline
-from nn.linear import EquistoreLinearLazy
+from nn.linear import metatensorLinearLazy
 from equisolve_futures.convert import ase_to_tensormap
 
 import rascaline_torch
@@ -35,7 +35,7 @@ frames = ase.io.read("test_H2O.xyz", index=":")
 
 targets = ase_to_tensormap(frames,"energy","forces","stress")
 test_frames = [rascaline_torch.as_torch_system(frame) for frame in frames]
-targets = equistore.to(targets, "torch")
+targets = metatensor.to(targets, "torch")
 
 mean_energy = torch.mean(targets.block(0).values)
 std_energy = torch.std(targets.block(0).values)
@@ -80,8 +80,8 @@ class TestCompositionTransformer(unittest.TestCase):
         fit_frames = [rascaline_torch.as_torch_system(frame) for frame in frames]
         test_frames = [rascaline_torch.as_torch_system(frame) for frame in frames_2]
 
-        targets_train = equistore.to(targets_train, "torch")
-        targets_test = equistore.to(targets_test, "torch")
+        targets_train = metatensor.to(targets_train, "torch")
+        targets_test = metatensor.to(targets_test, "torch")
 
         mean_energy_train = torch.mean(targets_train.block(0).values)
         std_energy_train = torch.std(targets_train.block(0).values)
@@ -131,8 +131,8 @@ class TestCompositionTransformer(unittest.TestCase):
         fit_frames = [rascaline_torch.as_torch_system(frame) for frame in frames]
         test_frames = [rascaline_torch.as_torch_system(frame) for frame in frames_2]
 
-        targets_train = equistore.to(targets_train, "torch")
-        targets_test = equistore.to(targets_test, "torch")
+        targets_train = metatensor.to(targets_train, "torch")
+        targets_test = metatensor.to(targets_test, "torch")
 
         mean_energy_train = torch.mean(targets_train.block(0).values)
         std_energy_train = torch.std(targets_train.block(0).values)

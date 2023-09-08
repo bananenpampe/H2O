@@ -12,16 +12,19 @@ from dataset.dataset import create_rascaline_dataloader
 import rascaline
 import torch
 from transformer.composition import CompositionTransformer
-import equistore
+import metatensor
 
 #default type is float64
 torch.set_default_dtype(torch.float64)
 
 # --- load the data ---
-frames_water = load_PBE0_TS()[:150]
-frames_train = frames_water[:100]
-frames_val = frames_water[100:150]
-frames_test = frames_water[20:30]
+frames_water = ase.io.read("../data/water_converted.xyz", index=":")
+#print(torch.std(torch.tensor([float(len(frame)) for frame in frames_water])))
+random.shuffle(frames_water)
+
+frames_water = frames_water[:50]
+frames_train = frames_water[:40]
+frames_val = frames_water[40:]
 
 # --- define the hypers ---
 hypers_sr = {
@@ -69,7 +72,7 @@ dataloader_setup = create_rascaline_dataloader(frames_train,
 
 transformer = CompositionTransformer()
 feat, prop, syst = next(iter(dataloader_setup))
-prop = equistore.to(prop,"torch",dtype=torch.float64)
+prop = metatensor.to(prop,"torch",dtype=torch.float64)
 transformer.fit(syst, prop)
 
 del feat, prop, syst
