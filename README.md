@@ -42,6 +42,13 @@ pip install --extra-index-url https://download.pytorch.org/whl/cpu git+https://g
 pip install git+https://github.com/lab-cosmo/metatensor
 ```
 
+finally install the requirements:
+
+```
+pip install -r requirements.txt
+```
+
+
 ## Train a model:
 
 An example code for training with energies and forces
