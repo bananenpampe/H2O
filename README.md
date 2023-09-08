@@ -25,11 +25,14 @@ ase_frames = load_phase_diagram_H2O()
 ## Install
 
 Begin with a fresh conda environment, (ie python 3.10) and activate the environment
+```
 conda create --name H2O python=3.10
+```
 
 Install rust, if it is not already installed:
+```
 conda install -c conda-forge rust
-
+```
 
 get rascaline + rascaline-torch + a cpu only torch version and metatensor, by running the three commands:
 
