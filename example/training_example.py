@@ -142,8 +142,8 @@ calc_lode = PowerSpectrum(calc_sr_spex,calc_lr)
 
 # --- create the dataloader ---
 dataloader_init = create_rascaline_dataloader(frames_water_train,
-                                         energy_key="energy",
-                                         forces_key="forces",                                       
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
                                          calculators=[calc_rs],
                                          do_gradients= True,
                                          precompute = True,
@@ -153,8 +153,8 @@ dataloader_init = create_rascaline_dataloader(frames_water_train,
                                          shuffle=True)
 
 dataloader = create_rascaline_dataloader(frames_water_train,
-                                         energy_key="energy",
-                                         forces_key="forces",                                       
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
                                          calculators=[calc_rs, calc_sr, calc_lode],
                                          do_gradients= True,
                                          precompute = True,
@@ -164,8 +164,8 @@ dataloader = create_rascaline_dataloader(frames_water_train,
                                          shuffle=True)
 
 dataloader_val = create_rascaline_dataloader(frames_water_val,
-                                         energy_key="energy",
-                                         forces_key="forces",                                       
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
                                          calculators=[calc_rs, calc_sr, calc_lode],
                                          do_gradients=True,
                                          precompute = True,
@@ -175,8 +175,8 @@ dataloader_val = create_rascaline_dataloader(frames_water_val,
                                          shuffle=False)
 
 dataloader_test = create_rascaline_dataloader(frames_water_test,
-                                         energy_key="energy",
-                                         forces_key="forces",                                       
+                                         energy_key="TotEnergy",
+                                         forces_key="force",                                       
                                          calculators=[calc_rs, calc_sr, calc_lode],
                                          do_gradients=True,
                                          precompute = True,
