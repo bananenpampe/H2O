@@ -22,6 +22,14 @@ ase_frames = load_phase_diagram_H2O()
 
 ```
 
+## Install
+
+get rascaline + rascaline-torch + a cpu only torch version
+
+```
+pip install --extra-index-url https://download.pytorch.org/whl/cpu git+https://github.com/luthaf/rascaline#subdirectory=python/rascaline-torch
+```
+
 ## Train a model:
 
 An example code for training with energies and forces
