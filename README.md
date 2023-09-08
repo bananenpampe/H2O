@@ -49,6 +49,43 @@ pip install -r requirements.txt
 ```
 
 
+
+
+### Installing i-pi
+
+Clone my i-pi fork:
+
+```
+git clone  https://github.com/bananenpampe/i-pi
+```
+
+change into the directory change the absolute path LIGHNING_CALCULATOR_PATH in `./i-pi/drivers/py/pes/lightning.py` to the absolute location of '/H2O/driver/'
+
+```
+from (in ./i-pi/drivers/py/pes/lightning.py)
+LIGHNING_CALCULATOR_PATH = "/Users/matthiaskellner/Documents/PhD/H2O/driver/"
+to
+LIGHNING_CALCULATOR_PATH = "LOCATION_OF_H2O_REPOSITORY/H2O/driver/"
+
+```
+
+pip install in the root of the i-pi fork:
+
+```
+pip install .
+```
+
+finally change into the f90 part and make the fortran extensions
+
+```
+cd LOCATION_OF_IPI_REPOSITORY/i-pi/drivers/f90
+
+make
+
+```
+
+
+
 ## Train a model:
 
 An example code for training with energies and forces
@@ -61,6 +98,8 @@ For this simply run:
 python example/training.py
 
 ```
+
+## Run MD
 
 
 ## Tests:
