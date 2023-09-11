@@ -58,7 +58,7 @@ import rascaline.torch
 import copy
 from itertools import combinations_with_replacement
 import numpy as np
-from join import join
+from metatensor.torch import join
 
 class RascalineAtomisticDataset(torch.utils.data.Dataset):
     """ A dataset for general rascaline calculators
@@ -377,7 +377,7 @@ def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.
 
     ##for now do densification on the fly 
      
-    return join(feats, axis="samples"), join(properties, axis="samples"), systems
+    return join(feats, axis="samples", different_keys="union"), join(properties, axis="samples"), systems
 #metatensor.join(properties, axis="samples"), systems
 
 
