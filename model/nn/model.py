@@ -55,3 +55,12 @@ class BPNNModel(torch.nn.Module):
         
         return responses
     
+    def get_energy(self, inputs, systems):
+        #for uncertainty model, for now ;)
+        
+        features = self.feature(inputs)
+        interactions = self.interaction(features)
+        aggregations = self.aggregation(interactions)
+        
+        return aggregations
+    

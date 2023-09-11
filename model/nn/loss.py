@@ -16,12 +16,50 @@ class metatensorLoss(torch.nn.Module):
     #TODO: implement a general 
     pass
 """
+
+#CPRS loss
+
+
+def CRPS_func(means: torch.Tensor, targets: torch.Tensor, vars: torch.Tensor) -> torch.Tensor:
+    """ Computes the CRPS of a gaussian distribution and a mean and uncertainty estimate
+
+    means: torch.Tensor
+        shape (N_samples, N_outputs)
+    targets: torch.Tensor
+        shape (N_samples, N_outputs)
+    vars: torch.Tensor
+        shape (N_samples, N_outputs)
+
+    """
+
+    sigma = torch.sqrt(vars)
+    norm_x = ( targets - means)/sigma
+    # torch.tensor(ndtr(norm_x.numpy())) 
+    cdf =   0.5 * (1 + torch.erf(norm_x / torch.sqrt(torch.tensor(2))))
+
+    normalization = 1 / (torch.sqrt(torch.tensor(2.0*torch.pi)))
+
+    pdf = normalization * torch.exp(-(norm_x ** 2)/2.0)
+    
+    crps = sigma * (norm_x * (2*cdf-1) + 2 * pdf - 1/(torch.sqrt(torch.tensor(torch.pi))))
+
+    return torch.mean(crps)
+
+class CRPS(torch.nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input, targets, vars):
+        return CRPS_func(input, targets, vars)
+
 class EnergyForceUncertaintyLoss(torch.nn.Module):
 
     def __init__(self,
                  w_forces: bool = True,
                  force_weight: float = 0.95,
-                 base_loss: torch.nn.Module = torch.nn.GaussianNLLLoss) -> None:
+                 base_loss: torch.nn.Module = CRPS,#torch.nn.GaussianNLLLoss,
+                 force_loss: torch.nn.Module = torch.nn.MSELoss) -> None:
         
         super().__init__()
 
@@ -35,27 +73,29 @@ class EnergyForceUncertaintyLoss(torch.nn.Module):
 
         self.w_forces = w_forces
         self.energy_loss = base_loss()
-        self.force_loss = base_loss()
+        self.force_loss = force_loss()
     
     def report(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
 
-        energy_pred_mean = input.block(0).values[:,0]
-        energy_pred_var = input.block(0).values[:,1]   
+        energy_pred_mean = input.block(0).values
+        energy_pred_var = input.block(1).values
         energy_target = targets.block(0).values
+
 
         energy_nll = self.energy_loss(energy_pred_mean, energy_target, energy_pred_var) #input, target, var
         forces_nll = torch.tensor(0.0)
 
         if self.w_forces:
             
-            forces_pred_mean = input.block(0).gradient("positions").values[:,:,0]
-            forces_pred_var = input.block(0).gradient("positions").values[:,:,1]
+            forces_pred_mean = input.block(0).gradient("positions").values
+            #forces_pred_var = input.block(1).gradient("positions").values
             forces_target = targets.block(0).gradient("positions").values
             
             forces_nll += self.force_loss(forces_pred_mean.flatten(),
-                                          forces_target.flatten(),
-                                          forces_pred_var.flatten())
+                                          forces_target.flatten(),)
+                                          #forces_pred_var.flatten())
 
+        #not quite sure why I needed this
         energy_target.detach()
 
         return energy_nll, forces_nll
@@ -67,16 +107,28 @@ class EnergyForceUncertaintyLoss(torch.nn.Module):
         # simple: get the torch tensors from the metatensor.TensorMap and use the torch.nn.MSELoss
         # write a metatensorLoss that takes two metatensor.TensorMaps and computes the (mse) loss
         
-        energy_pred = input.block(0).values
+        energy_pred_mean = input.block(0).values
+        energy_pred_var = input.block(1).values
         energy_target = targets.block(0).values
 
-        loss = self.energy_weight * self.energy_loss(energy_pred, energy_target) 
+        #print(energy_pred_mean)
+        #print(energy_pred_var)
+
+        loss = self.energy_weight * self.energy_loss(energy_pred_mean, energy_target, energy_pred_var)
+
 
         if self.w_forces:
-            forces_pred = input.block(0).gradient("positions").values
+            forces_pred_mean = input.block(0).gradient("positions").values
+            #forces_pred_var = input.block(1).gradient("positions").values
+
+            #print(forces_pred_mean)
+            #print(forces_pred_var)
+
             forces_target = targets.block(0).gradient("positions").values
 
-            loss += self.force_weight * self.force_loss(forces_pred.flatten(), forces_target.flatten())
+            loss += self.force_weight * self.force_loss(forces_pred_mean.flatten(),
+                                                        forces_target.flatten())
+                                                        #forces_pred_var.flatten())
 
         energy_target.detach()
 
