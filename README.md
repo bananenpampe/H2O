@@ -97,6 +97,20 @@ LOCATION_OF_IPI_REPOSITORY/i-pi/env.sh
 
 ## Train a model:
 
+We use wandb for logging and visualization of the training curves.
+Ideally you get yourself a wandb account and copy the wandb API token.
+
+In `H2O/example/` there is already a complete train script called `training_example.py`
+In the same folder create a simple textfile called `wandb.txt`
+and then write your wandb api key to the file
+
+```
+touch wandb.txt
+
+cat API_KEY > wandb.txt
+```
+
+
 An example code for training with energies and forces
 with a pytorch Lightning module, is provided in the example directory
 
@@ -127,6 +141,7 @@ jupyter-lab analysis.ipynb
 
 
 ## Tests:
+(TODO)
 
 Modules should be tested for their symmetry, and size consistent / size extensive properties.
 In case of the BPNN model, this will be outlined here:
