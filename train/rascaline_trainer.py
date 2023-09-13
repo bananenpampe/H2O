@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 from nn.model import BPNNModel
 from nn.loss import EnergyForceLoss
 from transformer.composition import CompositionTransformer
+from metatensor.torch import Labels, TensorMap
 
 class BPNNRascalineModule(pl.LightningModule):
     
@@ -41,6 +42,9 @@ class BPNNRascalineModule(pl.LightningModule):
     def calculate(self, feats, systems):
         
         outputs = self(feats, systems)
+        l = Labels(["energy"], values=torch.tensor([0]).reshape(-1,1))
+        outputs = TensorMap(l,[outputs.block(0).copy()])
+        print(outputs.keys)
         outputs = self.energy_transformer.inverse_transform(systems, outputs)
 
         return outputs
