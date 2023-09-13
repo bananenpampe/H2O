@@ -8,6 +8,13 @@ from typing import List
 from metatensor.torch import TensorMap, TensorBlock, Labels
 
 class UnitResponse(torch.nn.Module):
+    """Base class that defines the interface for a response layer.
+
+    A response layer takes as input a TensorMap and a list of torch.systems
+    and returns a TensorMap.
+
+    The Unit response is for models that do not require the calculation of response properties
+    """
     def __init__(self):
         super().__init__()
 
@@ -20,6 +27,9 @@ class UnitResponse(torch.nn.Module):
 
 
 class ForceUncertaintyRespone(UnitResponse):
+    """
+
+    """
 
     def forward(self, 
                 input: TensorMap, 
