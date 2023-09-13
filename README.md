@@ -118,7 +118,7 @@ For this simply run:
 
 ```
 
-python example/training.py
+python example/training_example.py
 
 ```
 
