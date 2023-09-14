@@ -20,10 +20,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 
 from nn.interaction import BPNNInteraction
 from nn.model import BPNNModel
-from rascaline_trainer import BPNNRascalineModule
+from rascaline_trainer_uncertainty import BPNNRascalineModule
 from transformer.composition import CompositionTransformer
 import torch
 import rascaline
+from nn.response import ForceUncertaintyRespone
 from dataset.dataset import create_rascaline_dataloader, RascalineAtomisticDataset
 import ase.io
 from metatensor.torch import Labels
