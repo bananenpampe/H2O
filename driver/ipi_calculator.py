@@ -131,8 +131,7 @@ class PytorchLightningCalculator:
         self.model = BPNNRascalineModule(\
         example_tensormap=feat,\
         model=BPNNModel(\
-        interaction=BPNNInteraction(n_out=64, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64),
-        response=ForceUncertaintyRespone()))
+        interaction=BPNNInteraction(n_out=1, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64)))
                 
         print(self.model)
         print(self.model.state_dict().keys())
@@ -147,7 +146,7 @@ class PytorchLightningCalculator:
                                                                     requires_grad=False)
              
         self.model.energy_transformer.weights = checkpoint["energy_transformer.weights"]
-        checkpoint.pop("energy_transformer.weights")
+        #checkpoint.pop("energy_transformer.weights")
         self.model.load_state_dict(checkpoint)
         self.model.energy_transformer.is_fitted = True
         self.model.energy_transformer.unique_labels = Labels(["species_center"], values=torch.tensor(self.dataset.all_species).reshape(-1,1))
@@ -183,19 +182,30 @@ class PytorchLightningCalculator:
         energy = energy.detach().numpy()
         forces = forces.detach().numpy()
 
+        
+        #THis is for the virial:
+        #"""
+        #outputs = list(torch.ones_like(out.block(0).values))
         """
-        outputs = list(torch.ones_like(out.block(0).values))
-
         dEdc = grad(outputs=list(out.block(0).values),
                       inputs=[forward_frame.cell],
                       grad_outputs=outputs,
                       create_graph=True,
                       retain_graph=True)[0]
         
-        #virial = -dEdc.detach().numpy().T @ cell_matrix
+        ##virial = -dEdc.detach().numpy().T @ cell_matrix
         virial = 0.5 * (virial + virial.T)
-        """
+        #"""
 
-        virial = cell_matrix * 0.0
+        virial = cell_matrix * 0.0  
 
-        return energy, forces, virial 
+        # write model preds to the extras:
+
+        #extras = {}
+
+        #extras["commitee_something"] = [energy]
+        #extras["commitee_something_forces"] = [forces]
+        #extras["commitee_something_virial"] = [virial]
+
+        #return energy, forces, virial
+        return energy, forces, virial #, extras

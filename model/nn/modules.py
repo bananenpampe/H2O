@@ -26,6 +26,10 @@ class metatensorLazyTorchApply(torch.nn.Module):
         self.property_str = property_str
     
     def initialize_weights(self, input: TensorMap) -> None:
+        """
+        Initializes the BPNN using an example TensorMap.
+        MUST CONTAIN ALL THE EXPECTED KEYS FOR THE ENTIRE TRAINING SET/ USE CASES
+        """
 
         #BETTER:
         # TODO: have a user-defined initialization-rule
@@ -44,6 +48,9 @@ class metatensorLazyTorchApply(torch.nn.Module):
             self.m_map[key] = self.m(x.shape[1], self.n_out)
     
     def forward(self, input: TensorMap) -> TensorMap:
+        """
+        Forward pass of the wrapper layer
+        """
         
         out_blocks = []
 
