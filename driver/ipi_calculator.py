@@ -45,10 +45,6 @@ class PytorchLightningCalculator:
         
         checkpoint = torch.load(checkpoint)['state_dict']
 
-
-
-
-
         hypers_ps = {
             "cutoff": 5.,
             "max_radial": 5,
@@ -199,12 +195,11 @@ class PytorchLightningCalculator:
         virial = cell_matrix * 0.0  
 
         # write model preds to the extras:
+        # make fake committee of models
+        ncomm = 4
+        committee = []
 
-        #extras = {}
+        for i in range(ncomm):
+            committee.append( (energy.flatten()[0], forces.flatten(), virial.flatten()) )
 
-        #extras["commitee_something"] = [energy]
-        #extras["commitee_something_forces"] = [forces]
-        #extras["commitee_something_virial"] = [virial]
-
-        #return energy, forces, virial
-        return energy, forces, virial #, extras
+        return energy, forces, virial, committee
