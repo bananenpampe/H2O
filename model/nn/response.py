@@ -27,9 +27,10 @@ class UnitResponse(torch.nn.Module):
 
 
 class ForceUncertaintyRespone(UnitResponse):
-    """
-
-    """
+    
+    def __init__(self, use_shallow_ensemble=True):
+        self.use_shallow_ensemble = use_shallow_ensemble
+        super().__init__()
 
     def forward(self, 
                 input: TensorMap, 
@@ -40,9 +41,15 @@ class ForceUncertaintyRespone(UnitResponse):
         name_0 = input.block(0).properties.names[0]
         val_0 = input.block(0).properties.values[0].reshape(-1,1)
 
-        mean_in = torch.mean(input.block(0).values, dim=1)
-        var_in = torch.var(input.block(0).values, dim=1)
+        if self.use_shallow_ensemble:
+            mean_in = torch.mean(input.block(0).values, dim=1)
+            var_in = torch.var(input.block(0).values, dim=1)
 
+        else:
+            mean_in = input.block(0).values[:,0]
+            var_in = input.block(0).values[:,1]
+            var_in = torch.nn.functional.softplus(var_in)
+        
         outputs_mean = list(torch.ones_like(mean_in))
         outputs_var = list(torch.ones_like(var_in))
         # TODO: we can simply do mean and variance here?
