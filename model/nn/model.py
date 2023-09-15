@@ -134,3 +134,44 @@ class BPNNModel(torch.nn.Module):
         
         return aggregations
     
+    def get_committee_forces(self, inputs, systems):
+        """ Returns the forces from the model.
+        """
+        #For now: lets be super lazy and just loop over samples
+        #energies has dimensions (n_samples, n_species)
+        # Iterate over each scalar energy to compute its gradient
+
+        Energies = self.get_energy(inputs, systems).block(0).values
+
+        #mean of forces equals the derivative of the 
+
+        #mean of forces equals the derivative of the 
+
+        grads_tot = []
+
+        for  syst_i, E_sys in zip(systems, Energies):
+
+            grads = []
+            # Iterate over each scalar energy to compute its gradient
+            
+            for e_i in E_sys:
+                # Zero-out previous gradients if any
+                if syst_i.positions.grad is not None:
+                    syst_i.positions.grad.zero_()
+
+                # Compute gradient of e_i with respect to the positions
+                e_i.backward(retain_graph=True)
+
+                # Append the computed gradient to our list
+                grads.append(syst_i.positions.grad.clone())
+
+            grads = torch.stack(grads)
+            grads_tot.append(grads)
+
+        grads_tot = torch.cat(grads_tot, dim=1)
+
+        return grads_tot
+
+        
+
+    
