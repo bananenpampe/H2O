@@ -20,10 +20,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 
 from nn.interaction import BPNNInteraction
 from nn.model import BPNNModel
-from rascaline_trainer import BPNNRascalineModule
+from rascaline_trainer_uncertainty import BPNNRascalineModule
 from transformer.composition import CompositionTransformer
 import torch
 import rascaline
+from nn.response import ForceUncertaintyRespone
 from dataset.dataset import create_rascaline_dataloader, RascalineAtomisticDataset
 import ase.io
 from metatensor.torch import Labels
@@ -44,10 +45,6 @@ class PytorchLightningCalculator:
         self.atoms = ase.io.read(initial_frame, index="0")
         
         checkpoint = torch.load(checkpoint)['state_dict']
-
-
-
-
 
         hypers_ps = {
             "cutoff": 5.,
@@ -199,12 +196,11 @@ class PytorchLightningCalculator:
         virial = cell_matrix * 0.0  
 
         # write model preds to the extras:
+        # make fake committee of models
+        ncomm = 4
+        committee = []
 
-        #extras = {}
+        for i in range(ncomm):
+            committee.append( (energy.flatten()[0], forces.flatten(), virial.flatten()) )
 
-        #extras["commitee_something"] = [energy]
-        #extras["commitee_something_forces"] = [forces]
-        #extras["commitee_something_virial"] = [virial]
-
-        #return energy, forces, virial
-        return energy, forces, virial #, extras
+        return energy, forces, virial, committee
