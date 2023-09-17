@@ -11,7 +11,8 @@ class metatensorMLPLazy(metatensorLazyTorchApply):
     def __init__(self, n_out: int,
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
-                 activation: torch.nn.Module = torch.nn.Tanh):
+                 activation: torch.nn.Module = torch.nn.Tanh,
+                 w_bias=True,):
         
         def predifined_MLP_factory(n_in: int, n_out: int):
             """ Returns a predefined MLP
@@ -20,6 +21,7 @@ class metatensorMLPLazy(metatensorLazyTorchApply):
                             n_out=n_out,
                             n_hidden=n_hidden,
                             n_hidden_layers=n_hidden_layers,
-                            activation=activation)
+                            activation=activation,
+                            w_bias=w_bias)
         
         super().__init__(predifined_MLP_factory, n_out)

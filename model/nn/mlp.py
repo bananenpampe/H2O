@@ -16,7 +16,8 @@ class MLP_mean(torch.nn.Module):
                  n_out: int,
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
-                 activation: torch.nn.Module = torch.nn.SiLU) -> None:
+                 activation: torch.nn.Module = torch.nn.SiLU,
+                 w_bias: bool = True) -> None:
         
         """
         Args:
@@ -46,7 +47,7 @@ class MLP_mean(torch.nn.Module):
                 *modules
                 )
         
-        self.mean_out = torch.nn.Linear(n_hidden,n_out)
+        self.mean_out = torch.nn.Linear(n_hidden,n_out, bias=w_bias)
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         

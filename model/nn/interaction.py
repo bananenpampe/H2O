@@ -36,14 +36,16 @@ class BPNNInteraction(torch.nn.Module):
     def __init__(self, n_out: int,
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
-                 activation: torch.nn.Module = torch.nn.Tanh):
+                 activation: torch.nn.Module = torch.nn.Tanh,
+                 w_bias=True,):
         
         super().__init__()
         
         self.model = metatensorMLPLazy(n_out, 
                                       n_hidden, 
                                       n_hidden_layers, 
-                                      activation)
+                                      activation,
+                                      w_bias)
 
     def initialize_weights(self, inputs: metatensor.TensorMap):
         self.model.initialize_weights(inputs)
