@@ -20,7 +20,8 @@ class BPNNRascalineModule(pl.LightningModule):
                  energy_transformer=CompositionTransformer(),
                  model = BPNNModel(
                  interaction=BPNNInteraction(n_out=2),
-                 response=ForceUncertaintyRespone(use_shallow_ensemble=False)
+                 response=ForceUncertaintyRespone(use_shallow_ensemble=False,
+                                                  predict_std_err=False)
                  ),
                  loss_fn = EnergyForceUncertaintyLoss,
                  energy_loss = torch.nn.GaussianNLLLoss,
