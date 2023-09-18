@@ -37,7 +37,8 @@ class BPNNInteraction(torch.nn.Module):
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
                  activation: torch.nn.Module = torch.nn.Tanh,
-                 w_bias=True,):
+                 w_bias=True,
+                 mve=False):
         
         super().__init__()
         
@@ -45,7 +46,8 @@ class BPNNInteraction(torch.nn.Module):
                                       n_hidden, 
                                       n_hidden_layers, 
                                       activation,
-                                      w_bias)
+                                      w_bias,
+                                      mve)
 
     def initialize_weights(self, inputs: metatensor.TensorMap):
         self.model.initialize_weights(inputs)

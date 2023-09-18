@@ -17,7 +17,8 @@ class MLP_mean(torch.nn.Module):
                  n_hidden: int = 32,
                  n_hidden_layers: int = 2,
                  activation: torch.nn.Module = torch.nn.SiLU,
-                 w_bias: bool = True) -> None:
+                 w_bias: bool = True,
+                 mve: bool = False) -> None:
         
         """
         Args:
@@ -29,6 +30,12 @@ class MLP_mean(torch.nn.Module):
         """
         
         super().__init__()
+
+        self.mve = mve
+
+        if self.mve:
+            assert n_out % 2 == 0, "n_out must be 2 for mve"
+            assert w_bias == False, "bias must be False for mve"
 
         modules = []
 
@@ -53,5 +60,10 @@ class MLP_mean(torch.nn.Module):
         
         x_hidden = self.nn(x)
         mean = self.mean_out(x_hidden)
+
+        if self.mve:
+            mean_out = mean[:,0]
+            var = torch.nn.functional.softplus(mean[:,1])
+            mean = torch.stack((mean_out, var), dim=1)
         
         return mean
