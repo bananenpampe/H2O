@@ -52,7 +52,7 @@ def get_system_global_composition(systems):
 
 class CompositionTransformer(torch.nn.Module):
     
-    def __init__(self, bias=False):
+    def __init__(self, bias=False, multi_block=False):
         super().__init__()
 
         self.is_global = True
@@ -66,6 +66,7 @@ class CompositionTransformer(torch.nn.Module):
         self.requires_systems = True
         self.unique_species = None
         self.unique_labels = None
+        self.multi_block = multi_block
     
     def _check_fitted(self):
         assert self.is_fitted, "Transformer has to be fitted before calling transform or forward"
@@ -137,7 +138,7 @@ class CompositionTransformer(torch.nn.Module):
 
         for gradient_key, gradient in targets.block(0).gradients():
             out_block.add_gradient(gradient_key, gradient.copy())
-
+        
         out_map = TensorMap(targets.keys, [out_block])
 
         return out_map
@@ -169,7 +170,12 @@ class CompositionTransformer(torch.nn.Module):
         for gradient_key, gradient in targets.block(0).gradients():
             out_block.add_gradient(gradient_key, gradient.copy())
 
-        out_map = TensorMap(targets.keys, [out_block])
+        if self.multi_block:
+            out_blocks = [out_block] + [block.copy() for block in targets.blocks()[1:]]
+            out_map = TensorMap(targets.keys, out_blocks)
+       
+        else:
+            out_map = TensorMap(targets.keys, [out_block])
 
         return out_map
 

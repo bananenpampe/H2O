@@ -30,7 +30,7 @@ class DeepEnsemble(torch.nn.Module):
 
         for ens in self.ensembles:
             
-            out = ens(inputs, systems)
+            out = ens.calculate(inputs, systems)
             out_pred.append(out)
 
         return out_pred
