@@ -2,6 +2,7 @@
 
 import dpdata
 import os
+import re
 
 def find_file_in_dirs(root_dir, filename):
     dirs_with_file = []
@@ -41,7 +42,7 @@ def load_PBE0_TS(which="lw_pimd"):
 
 
 
-def load_phase_diagram_H2O():
+def load_phase_diagram_H2O(load_ice_subset=False):
     """loads the entire H2O phase diagram dataset
     no distinction is made between different datasets
     """
@@ -58,16 +59,43 @@ def load_phase_diagram_H2O():
     dirs = find_file_in_dirs(PATH, filename)
 
     all_systems = []
+    identifiers = []
 
     for dir_ in dirs:
         #if "iter" in dir_:
             #print("in dir")
-        s = dpdata.LabeledSystem(dir_,type_map=["O","H"],fmt="deepmd/npy")
-        all_systems.append(s)
+        #print(dir_)
+        if load_ice_subset:
+            matches = re.findall(r'(?<=/)([^/]*ice[^/]*)(?=/)', dir_)
+            
+            if len(matches) > 0:
+                s = dpdata.LabeledSystem(dir_,type_map=["O","H"],fmt="deepmd/npy")
+                all_systems.append(s)
+                if "high_pressure" in dir_:
+                    identifiers.append(matches[0]+"_hp")
+                else:
+                    identifiers.append(matches[0])
+                print(matches[0])
+        
+        else:
+            s = dpdata.LabeledSystem(dir_,type_map=["O","H"],fmt="deepmd/npy")
+            all_systems.append(s)
         
     frames = []
-    for s in all_systems:
-        frames.extend(s.to_ase_structure())
+    
+    for n, s in enumerate(all_systems):
+        
+        if load_ice_subset:
+            
+            tmp_frames = s.to_ase_structure()
+            
+            for frame in tmp_frames:
+                frame.info["identifier"] = identifiers[n]
+            
+            frames.extend(tmp_frames)
+        
+        else:
+            frames.extend(s.to_ase_structure())
 
     return frames
 
