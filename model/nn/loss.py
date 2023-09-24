@@ -58,7 +58,7 @@ class EnergyForceUncertaintyLoss(torch.nn.Module):
     def __init__(self,
                  w_forces: bool = True,
                  force_weight: float = 0.95,
-                 base_loss: torch.nn.Module = CRPS,#torch.nn.GaussianNLLLoss,
+                 base_loss: torch.nn.Module = torch.nn.GaussianNLLLoss,
                  force_loss: torch.nn.Module = torch.nn.MSELoss) -> None:
         
         super().__init__()
@@ -114,7 +114,9 @@ class EnergyForceUncertaintyLoss(torch.nn.Module):
         #print(energy_pred_mean)
         #print(energy_pred_var)
 
-        loss = self.energy_weight * self.energy_loss(energy_pred_mean, energy_target, energy_pred_var)
+        loss = self.energy_weight * self.energy_loss(energy_pred_mean.flatten(),
+                                                     energy_target.flatten(),
+                                                     energy_pred_var.flatten())
 
 
         if self.w_forces:
@@ -195,3 +197,27 @@ class EnergyForceLoss(torch.nn.Module):
         return loss
 
 
+class GeneralLossUQ(torch.nn.Module):
+
+    def __init__(self,
+                 w_forces: bool = True,
+                 force_weight: float = 0.95,
+                 base_loss: torch.nn.Module = torch.nn.GaussianNLLLoss) -> None:
+        
+        super().__init__()
+
+        self.loss_fn = base_loss()
+    
+    def forward(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
+
+        pred = input.block(0).values
+        pred_var = input.block(1).values
+        target = targets.block(0).values
+
+        loss_ = self.loss_fn(pred.flatten(), target.flatten(), pred_var.flatten())
+
+        return loss_
+
+
+    def report(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
+        return self.forward(input, targets)
