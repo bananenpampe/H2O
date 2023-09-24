@@ -51,7 +51,10 @@ def ase_to_tensormap(
         positions_gradients = [-torch.tensor(f.arrays[forces]) for f in frames]
     else:
         try:
-            positions_gradients = [-torch.tensor(f.get_forces()) for f in frames]
+            if frames[0].calc is not None:
+                positions_gradients = [-torch.tensor(f.get_forces()) for f in frames]
+            else:
+                positions_gradients = None
         except ase.ase.calculators.calculator.PropertyNotImplementedError:
             positions_gradients = None
         
