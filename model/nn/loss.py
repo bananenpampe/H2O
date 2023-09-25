@@ -1,6 +1,7 @@
 
 import torch
 import metatensor
+from metatensor.torch import sort
 
 """
 class TensorMapMSE(torch.nn.Module):
@@ -210,11 +211,37 @@ class GeneralLossUQ(torch.nn.Module):
     
     def forward(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
 
-        pred = input.block(0).values
-        pred_var = input.block(1).values
+        out = input #sort(input, axes="samples")
+
+        pred = out.block(0).values
+        pred_var = out.block(1).values
         target = targets.block(0).values
 
         loss_ = self.loss_fn(pred.flatten(), target.flatten(), pred_var.flatten())
+
+        return loss_
+
+
+    def report(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
+        return self.forward(input, targets)
+
+class GeneralLoss(torch.nn.Module):
+
+    def __init__(self,
+                 w_forces: bool = True,
+                 force_weight: float = 0.95,
+                 base_loss: torch.nn.Module = torch.nn.MSELoss) -> None:
+        
+        super().__init__()
+
+        self.loss_fn = base_loss()
+    
+    def forward(self, input: metatensor.TensorMap, targets: metatensor.TensorMap) -> dict:
+
+        pred = input.block(0).values
+        target = targets.block(0).values
+
+        loss_ = self.loss_fn(pred.flatten(), target.flatten())
 
         return loss_
 

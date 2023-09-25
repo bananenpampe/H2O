@@ -76,7 +76,10 @@ class BPNNStructureWiseAggregationVar(StructureWiseAggregation):
     
     def forward(self, inputs: metatensor.TensorMap):
         #print(inputs.block(0).samples)
+
+        
         inputs = inputs.keys_to_samples("species_center")
+        
 
         #should return a tensormap of values with shape (N_structures, N_ensembles)
         out = self.aggregation_fn(inputs)
@@ -114,7 +117,65 @@ class BPNNStructureWiseAggregationVar(StructureWiseAggregation):
 
         #add block_2 here later 
 
-        return TensorMap(keys_in, [block_0, block_1])        
+        return TensorMap(keys_in, [block_0, block_1])    
+
+
+class BPNNAtomWiseAggregationVar(StructureWiseAggregation):
+    
+    def __init__(self, mode: str ="sum", use_shallow_ensemble=True, predict_std_err=False):
+
+        self.use_shallow_ensemble = use_shallow_ensemble
+        self.predict_std_err = predict_std_err
+
+        super().__init__(mode=mode, sum_over=["species_center","center"])
+    
+    def forward(self, inputs: metatensor.TensorMap):
+        #print(inputs.block(0).samples)
+        #print(inputs.block(0).values.shape)
+        #out = inputs.keys_to_samples("species_center")
+        #print(inputs.block(0).values.shape)
+        #should return a tensormap of values with shape (N_structures, N_ensembles)
+        #out = self.aggregation_fn(inputs)
+        #print(inputs.block(0).samples.names)
+        #print(inputs.block(0).samples.values)
+        out = inputs
+
+        name_0 = out.block(0).properties.names[0]
+        val_0 = out.block(0).properties.values[0].reshape(-1,1)
+
+        if self.use_shallow_ensemble:
+            mean_in = torch.mean(out.block(0).values, dim=1, keepdim=True)
+            var_in = torch.var(out.block(0).values, dim=1, keepdim=True)
+            #print(mean_in.shape)
+            #print(var_in.shape)
+
+        else:
+            
+            mean_in = out.block(0).values[:,0]
+            var_in = out.block(0).values[:,1]
+            
+            if self.predict_std_err:
+                var_in = var_in ** 2
+
+
+        block_0 = TensorBlock(values=mean_in,
+                                samples=out.block(0).samples,
+                                components=[],
+                                properties=Labels([name_0], val_0))
+
+        
+        block_1 = TensorBlock(values=var_in,
+                                samples=out.block(0).samples,
+                                components=[],
+                                properties=Labels([name_0], val_0))
+        
+        #block_2 = input.block(0).copy()
+
+        keys_in = Labels(["properties"], values=torch.tensor([0, 1]).reshape(-1,1))
+
+        #add block_2 here later 
+
+        return TensorMap(keys_in, [block_0, block_1])  
 
 """
 

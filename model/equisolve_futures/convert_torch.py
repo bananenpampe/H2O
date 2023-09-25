@@ -16,6 +16,43 @@ import numpy as np
 import torch
 from metatensor.torch import Labels, TensorBlock, TensorMap
 
+
+def ase_scalar_to_tensormap(
+    frames: List[ase.Atoms],
+    identifier: str = "id",
+    filter_by: int = None,
+) -> TensorMap:
+    
+    """Store informations from :class:`ase.Atoms` 
+    in a :class:`metatensor.TensorMap`.
+
+    :param frames:
+        ase.Atoms or list of ase.Atoms
+    :param energy:
+        key for extracting energy per structure
+    :param forces:
+        key for extracting atomic forces
+    :param stress:
+        key for extracting stress per structure
+
+    :returns:
+        TensorMap containing the given information
+    """
+    if not isinstance(frames, list):
+        frames = [frames]
+
+    values = []
+    for frame in frames:
+        if filter_by is not None:
+            values.append(frame.arrays[identifier][frame.numbers == filter_by].tolist())
+        else:
+            values.append(frame.arrays[identifier].tolist())
+
+    return atomic_properties_to_tensormap(values, identifier)
+
+
+
+
 def ase_to_tensormap(
     frames: List[ase.Atoms],
     energy: str = None, 
@@ -72,6 +109,19 @@ def ase_to_tensormap(
             cell_gradients = None
 
     return properties_to_tensormap(values, positions_gradients, cell_gradients, property_name=energy)
+
+def atomic_properties_to_tensormap(values: List[float], property_name) -> TensorMap:
+
+   # assert len(values) == 1, "currently only properties for one structure are supported"
+
+    block = TensorBlock(
+        values=torch.tensor(values[0]).reshape(-1, 1),
+        samples=Labels(["atoms"], torch.arange(len(values[0])).reshape(-1, 1)),
+        components=[],
+        properties=Labels([property_name], torch.tensor([(0,)])),
+    )
+
+    return TensorMap(Labels.single(), [block])
 
 
 def properties_to_tensormap(

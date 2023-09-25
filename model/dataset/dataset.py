@@ -46,7 +46,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 import ase
 import torch
 from .dataset_helpers import get_global_unique_species
-from convert_torch import ase_to_tensormap
+from convert_torch import ase_to_tensormap, ase_scalar_to_tensormap
 
 
 from typing import List, Union, Tuple
@@ -59,6 +59,7 @@ import copy
 from itertools import combinations_with_replacement
 import numpy as np
 from metatensor.torch import join
+from metatensor.torch.operations import sort
 
 class RascalineAtomisticDataset(torch.utils.data.Dataset):
     """ A dataset for general rascaline calculators
@@ -70,7 +71,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
     # if precompute is true, then the features are calculated during instantation
 
 
-    def _compute_feats(self, frame, global_species):
+    def _compute_feats(self, frame, global_species, filter_by_central_id=None):
         # currently we have the issue, that join functions do not tolerate diffent number of blocks.
         # if we have a system that has at least a constant global composition
         # and the features, are SOAP-like we can use this reshaping
@@ -79,8 +80,32 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         feat_tmp = []
 
         for calculator in self.calculators:
+
+            filter_by = None
+
+            if filter_by_central_id is not None:
+                assert isinstance(filter_by_central_id, int), "filter_by_central has to be an integer"
+                
+                if isinstance(calculator, rascaline.torch.SoapPowerSpectrum):
+                    neighbours_idx = list(combinations_with_replacement(global_species,r=2))
+                    neighbours_idx = torch.tensor(neighbours_idx)
+                    central_idx = torch.ones_like(neighbours_idx[:,0]).reshape(-1,1)
+                    central_idx.fill_(filter_by_central_id)
+                    labels_vals = torch.cat([central_idx,neighbours_idx],dim=1)
+
+                    filter_by = metatensor.torch.Labels(["species_center", "species_neighbor_1", "species_neighbor_2" ], labels_vals)
+                    
+                elif isinstance(calculator, rascaline.torch.SoapRadialSpectrum):
+                    neighbours_idx = torch.tensor(global_species).reshape(-1,1)
+                    central_idx = torch.ones_like(neighbours_idx[:,0]).reshape(-1,1)
+                    central_idx.fill_(filter_by_central_id)
+                    labels_vals = torch.cat([central_idx,neighbours_idx],dim=1)
+                    filter_by = metatensor.torch.Labels(["species_center", "species_neighbor"], labels_vals)
+                    
+                else:
+                    raise NotImplementedError("Currently only Soap and SoapPowerSpectrum calculators are supported for filter_by_central")
             
-            f = calculator(frame)
+            f = calculator(frame, selected_keys=filter_by)
 
             #print(f.keys.names)
             #print(self.calculators)
@@ -94,7 +119,8 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                 f = f.keys_to_properties(pairs)
                 
                 feat_tmp.append(f)
-
+   
+            #TODO replace by issinstance
             elif f.keys.names == ['species_center', 'species_neighbor_1', 'species_neighbor_2']:
                 
                 perm = combinations_with_replacement(global_species,2)
@@ -131,6 +157,8 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         energy_key: str = None,
         forces_key: str = None,
         stress_key: str = None,
+        filter_by_central_id: int = None,
+        atomistic: bool = False,
     ):
 
         #assert that frames and calculators are not empty
@@ -170,6 +198,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         self.do_gradients = do_gradients
         self.do_cell_gradients = do_cell_gradients
         self.precompute = precompute
+        self.filter_by = filter_by_central_id
 
 
 
@@ -196,7 +225,10 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         
         # TODO: make this more general
         #self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key) for frame in frames]
-        self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key)
+        if atomistic:
+            self.properties = [ase_scalar_to_tensormap(frame, energy_key, self.filter_by) for frame in frames]
+        else:
+            self.properties = [ase_to_tensormap(frame, energy_key, forces_key, stress_key)
                                          for frame in frames]
         
         
@@ -259,7 +291,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         if self.precompute:
             for i, frame in enumerate(self.frames):
 
-                feat = self._compute_feats(frame, self.all_species)
+                feat = self._compute_feats(frame, self.all_species, self.filter_by)
                 
                 if on_disk:
                     #save the feats to disk
@@ -302,7 +334,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
         else:
 
             if self.feats[idx] is None:
-                feats = self._compute_feats(self.frames[idx],self.all_species)
+                feats = self._compute_feats(self.frames[idx],self.all_species, self.filter_by)
                 
                 if self.lazy_fill_up:
                     self.feats[idx] = feats
@@ -380,6 +412,27 @@ def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.
     return join(feats, axis="samples", different_keys="union"), join(properties, axis="samples"), systems
 #metatensor.join(properties, axis="samples"), systems
 
+def _metatensor_collate_sort(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.TensorMap, rascaline.torch.System]]):
+    #TODO: add renumbering of the tensor maps, (idx)
+
+    feats = [tensor_map[0] for tensor_map in tensor_maps]
+    properties = [tensor_map[1] for tensor_map in tensor_maps]
+    #for tensor_map in tensor_maps: tensor_map[2].positions.detach()
+    systems = [tensor_map[2] for tensor_map in tensor_maps]
+
+    #print(type(feats[0]))
+    #print(type(feats[0].block(0).values))  
+    #print(type(feats[0].block(0).samples))  
+
+    #print(type(properties[0]))
+
+    ##for now do densification on the fly 
+    prop_joined = join(properties, axis="samples")
+    out_sort = sort(prop_joined, axes="samples")
+
+
+     
+    return join(feats, axis="samples", different_keys="union"), out_sort, systems
 
 def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
@@ -407,6 +460,9 @@ def create_rascaline_dataloader(
     energy_key: str = None,
     forces_key: str = None,
     stress_key: str = None,
+    filter_by_central_id: int = None,
+    atomistic: bool = False,
+
     **kwargs,
     ):
     """creates a rascaline dataloader
@@ -422,6 +478,8 @@ def create_rascaline_dataloader(
         energy_key=energy_key,
         forces_key=forces_key,
         stress_key=stress_key,
+        filter_by_central_id=filter_by_central_id,
+        atomistic=atomistic,
     )
 
     dataloader = torch.utils.data.DataLoader(
