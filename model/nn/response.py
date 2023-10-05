@@ -139,11 +139,130 @@ class ForceUncertaintyRespone(UnitResponse):
             
             mean_in = input.block(0).values[:,0]
             var_in = input.block(0).values[:,1]
-            var_in = torch.nn.functional.softplus(var_in)
             
             if self.predict_std_err:
                 var_in = var_in ** 2
         
+        outputs_mean = list(torch.ones_like(mean_in))
+        outputs_var = list(torch.ones_like(var_in))
+        # TODO: we can simply do mean and variance here?
+
+        dEdX = grad(outputs=list(mean_in),
+                      inputs=[sys_i.positions for sys_i in systems],
+                      grad_outputs=outputs_mean,
+                      create_graph=True,
+                      retain_graph=True)
+        
+        """
+        dsigmadX = grad(outputs=list(var_in),
+                      inputs=[sys_i.positions for sys_i in systems],
+                      grad_outputs=outputs_var,
+                      create_graph=True,
+                      retain_graph=True)
+        """
+        #print("hello")
+
+        #negative forces, are position gradients
+        gradient_values = torch.vstack(dEdX)
+        gradient_uncertainty = gradient_values
+
+        position_gradient_samples = Labels(
+            ["sample", "structure", "atom"],
+            torch.tensor(np.array(
+                [
+                    [s, s, a]
+                    for s in range(len(systems))
+                    for a in range(len(dEdX[s]))
+                ]
+            ))
+        )
+
+        #TODO: change to torch labels once move to rascaline.rascaline-torch
+        positions_gradient = TensorBlock(
+            values=gradient_values.reshape(-1, 3, 1),
+            samples=position_gradient_samples,
+            components=[Labels(["direction"], torch.arange(3).reshape(-1, 1))],
+            properties=Labels([name_0], val_0),
+        )
+
+        
+        positions_gradient_uncertainty = TensorBlock(
+            values=gradient_uncertainty.reshape(-1, 3, 1),
+            samples=position_gradient_samples,
+            components=[Labels(["direction"], torch.arange(3).reshape(-1, 1))],
+            properties=Labels([name_0], val_0),
+        )
+        
+
+
+        block_0 = TensorBlock(values=mean_in.reshape(-1, 1),
+                                samples=input.block(0).samples,
+                                components=[],
+                                properties=Labels([name_0], val_0))
+        
+        block_0.add_gradient("positions", positions_gradient)
+
+        
+        block_1 = TensorBlock(values=var_in.reshape(-1, 1),
+                                samples=input.block(0).samples,
+                                components=[],
+                                properties=Labels([name_0], val_0))
+        
+        block_1.add_gradient("positions", positions_gradient_uncertainty)
+        
+
+        #block_2 = input.block(0).copy()
+
+        keys_in = Labels(["energy"], values=torch.tensor([0, 1]).reshape(-1,1))
+
+        #add block_2 here later 
+
+        return TensorMap(keys_in, [block_0, block_1])
+
+
+class PseudoForceUncertaintyRespone(UnitResponse):
+    
+    def __init__(self,
+                 use_shallow_ensemble=True,
+                 predict_std_err=False,
+                 A=1.0,
+                 B=1.0,):
+        
+        self.use_shallow_ensemble = use_shallow_ensemble
+        self.predict_std_err = predict_std_err
+        self.A = A
+        self.B = B
+        super().__init__()
+    
+    def get_pseudo_energy(self, var_e, A, B):
+        E_pseudo = A * (torch.exp(-var_e/B) - 1.)
+        return E_pseudo
+
+    def forward(self, 
+                input: TensorMap, 
+                systems: List[rascaline.torch.System]) -> TensorMap:
+        
+        # input should be a tensormap of shape (n_structures, n_ensembles)
+
+        name_0 = input.block(0).properties.names[0]
+        val_0 = input.block(0).properties.values[0].reshape(-1,1)
+
+        if self.use_shallow_ensemble:
+            mean_in = torch.mean(input.block(0).values, dim=1)
+            var_in = torch.var(input.block(0).values, dim=1)
+
+        else:
+            
+            mean_in = input.block(0).values[:,0]
+            var_in = input.block(0).values[:,1]
+            
+            if self.predict_std_err:
+                var_in = var_in ** 2
+        
+        #adding pseudo energies
+        pseudo_energy = self.get_pseudo_energy(var_in, self.A, self.B)
+        mean_in += pseudo_energy
+
         outputs_mean = list(torch.ones_like(mean_in))
         outputs_var = list(torch.ones_like(var_in))
         # TODO: we can simply do mean and variance here?
