@@ -14,7 +14,7 @@ class DeepEnsemble(torch.nn.Module):
     """Constructs a Deep Ensemble from N*Mean_Var MLPs
     """
     
-    def __init__(self, ensembles, kind) -> None:
+    def __init__(self, ensembles, kind, w_forces=True) -> None:
         super().__init__()
 
         assert kind in ["deep-ens","mse-deep-ens"]
@@ -23,6 +23,7 @@ class DeepEnsemble(torch.nn.Module):
         
         self.ensembles = torch.nn.ModuleList(ensembles)
         self.kind = kind
+        self.w_forces = w_forces
 
     def forward(self, inputs, systems):
         
@@ -42,12 +43,17 @@ class DeepEnsemble(torch.nn.Module):
         
         out_pred = self.forward(inputs, systems)
         E_pred = torch.stack([out.block(0).values for out in out_pred], dim=1)
-        F_pred = torch.stack([out.block(0).gradient("positions").values for out in out_pred], dim=1)
-        F_pred_mean = torch.mean(F_pred, dim=1)
+        print(E_pred)
+
+        if self.w_forces:
+            F_pred = torch.stack([out.block(0).gradient("positions").values for out in out_pred], dim=1)
+            F_pred_mean = torch.mean(F_pred, dim=1)
+            F_UQ_epistemic = torch.var(F_pred, dim=1)
+        else:
+            F_pred_mean = None
+            F_UQ_epistemic = None
 
         E_UQ_epistemic = torch.var(E_pred, dim=1)
-        F_UQ_epistemic = torch.var(F_pred, dim=1)
-
         E_pred_mean = torch.mean(E_pred, dim=1)
 
         if self.kind == "deep-ens":
