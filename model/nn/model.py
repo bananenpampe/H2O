@@ -18,6 +18,7 @@ from .feature import UnitFeatures
 from .interaction import BPNNInteraction
 from .aggregation import StructureWiseAggregation, BPNNStructureWiseAggregation
 from .response import UnitResponse, ForceRespone
+from tqdm.auto import tqdm
 
 class BPNNModel(torch.nn.Module):
     """ Class that combines feture, interaction, aggregation and response layers in a BPNN-like model.
@@ -133,6 +134,38 @@ class BPNNModel(torch.nn.Module):
         aggregations = self.aggregation(interactions)
         
         return aggregations
+    
+    def get_committee(self, input, system):
+        """ Returns the committee from the model.
+
+        Args:
+            inputs: TensorMap containing the input features/data
+            systems: List of torch.systems containing the positions etc.
+
+        """
+        
+        Energy_committee = self.get_energy(input, system).block(0).values
+        #print(Energy_committee.shape)
+        
+        grads = []
+        # Iterate over each scalar energy to compute its gradient
+        
+        for e_i in Energy_committee.flatten():
+            # Zero-out previous gradients if any
+            if system.positions.grad is not None:
+                system.positions.grad.zero_()
+
+            # Compute gradient of e_i with respect to the positions
+            e_i.backward(retain_graph=True)
+
+            # Append the computed gradient to our list
+            grads.append(system.positions.grad.clone())
+
+        grads = torch.stack(grads)
+
+        return Energy_committee, grads
+        
+
     
     def get_committee_forces(self, inputs, systems):
         """ Returns the forces from the model.
