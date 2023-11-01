@@ -35,6 +35,20 @@ class DeepEnsemble(torch.nn.Module):
             out_pred.append(out)
 
         return out_pred
+
+    def get_committee(self, inputs, systems):
+        """Returns the predictions of the ensemble members
+        """
+
+        out_pred = self.forward(inputs, systems)
+        E_pred = torch.stack([out.block(0).values for out in out_pred], dim=1)
+
+        if self.w_forces:
+            F_pred = torch.stack([out.block(0).gradient("positions").values for out in out_pred], dim=1)
+        else:
+            F_pred = None
+
+        return E_pred, F_pred
     
     def report_energy_forces(self, inputs, systems, report_aleatoric=False):
 
@@ -43,7 +57,6 @@ class DeepEnsemble(torch.nn.Module):
         
         out_pred = self.forward(inputs, systems)
         E_pred = torch.stack([out.block(0).values for out in out_pred], dim=1)
-        print(E_pred)
 
         if self.w_forces:
             F_pred = torch.stack([out.block(0).gradient("positions").values for out in out_pred], dim=1)
@@ -74,4 +87,4 @@ class DeepEnsemble(torch.nn.Module):
             return E_pred_mean, E_UQ,  E_UQ_aleatoric, E_UQ_epistemic, F_pred_mean, F_UQ_epistemic,
         else:
             return E_pred_mean, E_UQ, F_pred_mean, F_UQ_epistemic
-        
+    
