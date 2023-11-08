@@ -143,6 +143,14 @@ class CompositionTransformer(torch.nn.Module):
 
         return out_map
     
+    def get_composition_energy(self, systems):
+        self._check_fitted()
+
+        feats = self._compute_feat(systems)
+        pred = feats @ self.weights
+
+        return pred
+    
     def inverse_transform(self, systems, targets):
         self._check_fitted()
 

@@ -105,8 +105,10 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
                 else:
                     raise NotImplementedError("Currently only Soap and SoapPowerSpectrum calculators are supported for filter_by_central")
             
-            f = calculator(frame, selected_keys=filter_by)
-
+                f = calculator(frame, selected_keys=filter_by)
+            
+            else:
+                f = calculator(frame)
             #print(f.keys.names)
             #print(self.calculators)
 
@@ -412,23 +414,7 @@ def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.
     return join(feats, axis="samples", different_keys="union"), join(properties, axis="samples"), systems
 #metatensor.join(properties, axis="samples"), systems
 
-def _metatensor_collate_sort(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.TensorMap, rascaline.torch.System]]):
-    #TODO: add renumbering of the tensor maps, (idx)
 
-    feats = [tensor_map[0] for tensor_map in tensor_maps]
-    properties = [tensor_map[1] for tensor_map in tensor_maps]
-    #for tensor_map in tensor_maps: tensor_map[2].positions.detach()
-    systems = [tensor_map[2] for tensor_map in tensor_maps]
-
-    #print(type(feats[0]))
-    #print(type(feats[0].block(0).values))  
-    #print(type(feats[0].block(0).samples))  
-
-    #print(type(properties[0]))
-
-    ##for now do densification on the fly 
-    prop_joined = join(properties, axis="samples")
-    out_sort = sort(prop_joined, axes="samples")
 
 
      
