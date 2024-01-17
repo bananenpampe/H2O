@@ -53,6 +53,7 @@ from typing import List, Union, Tuple
 import rascaline
 import metatensor
 import metatensor.torch
+from metatensor.torch.atomistic import System
 import rascaline.torch
 
 import copy
@@ -395,7 +396,7 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
 
 
-def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.TensorMap, rascaline.torch.System]]):
+def _metatensor_collate(tensor_maps: List[Tuple[metatensor.TensorMap,metatensor.TensorMap, System]]):
     #TODO: add renumbering of the tensor maps, (idx)
 
     feats = [tensor_map[0] for tensor_map in tensor_maps]

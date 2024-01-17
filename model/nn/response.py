@@ -6,6 +6,7 @@ from torch.autograd import grad
 from typing import List
 
 from metatensor.torch import TensorMap, TensorBlock, Labels
+from metatensor.torch.atomistic import System
 
 class UnitResponse(torch.nn.Module):
     """Base class that defines the interface for a response layer.
@@ -22,14 +23,14 @@ class UnitResponse(torch.nn.Module):
     def initialize_weights(self, input: TensorMap):
         pass
     
-    def forward(self, input: TensorMap, systems: List[rascaline.torch.System]) -> TensorMap:
+    def forward(self, input: TensorMap, systems: List[System]) -> TensorMap:
         return input
 
 class MeanVarianceForceUncertaintyRespone(UnitResponse):
 
     def forward(self, 
                 input: TensorMap, 
-                systems: List[rascaline.torch.System]) -> TensorMap:
+                systems: List[System]) -> TensorMap:
         
         # input should be a tensormap of shape (n_structures, 2)
 
@@ -124,7 +125,7 @@ class ForceUncertaintyRespone(UnitResponse):
 
     def forward(self, 
                 input: TensorMap, 
-                systems: List[rascaline.torch.System]) -> TensorMap:
+                systems: List[System]) -> TensorMap:
         
         # input should be a tensormap of shape (n_structures, n_ensembles)
 
@@ -240,7 +241,7 @@ class PseudoForceUncertaintyRespone(UnitResponse):
 
     def forward(self, 
                 input: TensorMap, 
-                systems: List[rascaline.torch.System]) -> TensorMap:
+                systems: List[System]) -> TensorMap:
         
         # input should be a tensormap of shape (n_structures, n_ensembles)
 
@@ -344,7 +345,7 @@ class ForceRespone(UnitResponse):
 
     def forward(self, 
                 input: TensorMap, 
-                systems: List[rascaline.torch.System]) -> TensorMap:
+                systems: List[System]) -> TensorMap:
 
         outputs = list(torch.ones_like(input.block(0).values))
 
@@ -392,7 +393,7 @@ class CellResponse(UnitResponse):
 
     def forward(self, 
                 input: TensorMap, 
-                systems: List[rascaline.torch.System]) -> TensorMap:
+                systems: List[System]) -> TensorMap:
 
         outputs = list(torch.ones_like(input.block(0).values))
 

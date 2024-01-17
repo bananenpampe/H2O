@@ -212,7 +212,7 @@ def join(
     # Deduce if sample/property names are the same in all tensors.
     # If this is not the case we have to change unify the corresponding labels later.
     if axis == "samples":
-        names_list = [tensor.samples_names for tensor in tensors]
+        names_list = [tensor.sample_names for tensor in tensors]
     else:
         names_list = [tensor.properties_names for tensor in tensors]
 

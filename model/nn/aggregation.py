@@ -38,10 +38,10 @@ class StructureWiseAggregation(torch.nn.Module):
             raise NotImplementedError(f"mode {mode} not implemented")
 
         if mode == "mean":
-            self.aggregation_fn = partial(mean_over_samples,samples_names=self.sum_over)
+            self.aggregation_fn = partial(mean_over_samples,sample_names=self.sum_over)
         
         elif mode == "sum":
-            self.aggregation_fn = partial(sum_over_samples,samples_names=self.sum_over)
+            self.aggregation_fn = partial(sum_over_samples,sample_names=self.sum_over)
         
         elif mode == "passthrough":
             self.aggregation_fn = lambda x: x

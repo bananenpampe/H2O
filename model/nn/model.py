@@ -110,7 +110,7 @@ class BPNNModel(torch.nn.Module):
         interactions = int_model(features)
 
         if structure_wise is True:
-            interactions = sum_over_samples(interactions, samples_names=["center"])
+            interactions = sum_over_samples(interactions, sample_names=["center"])
             interactions = interactions.keys_to_properties("species_center")
         
         else:
