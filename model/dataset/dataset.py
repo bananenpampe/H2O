@@ -454,13 +454,13 @@ def create_rascaline_dataloader(
     """creates a rascaline dataloader
     """
     dataset = RascalineAtomisticDataset(
-        frames,
-        calculators,
-        do_gradients,
-        precompute,
-        lazy_fill_up,
-        transforms,
-        memory_save,
+        frames=frames,
+        calculators=calculators,
+        do_gradients=do_gradients,
+        precompute=precompute,
+        lazy_fill_up=lazy_fill_up,
+        transforms=transforms,
+        memory_save=memory_save,
         energy_key=energy_key,
         forces_key=forces_key,
         stress_key=stress_key,
@@ -469,7 +469,7 @@ def create_rascaline_dataloader(
     )
 
     dataloader = torch.utils.data.DataLoader(
-        dataset,
+        dataset=dataset,
         batch_size=batch_size,
         shuffle=shuffle,
         collate_fn=collate_fn,
