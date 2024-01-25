@@ -335,7 +335,6 @@ class RascalineAtomisticDataset(torch.utils.data.Dataset):
 
 
         else:
-
             if self.feats[idx] is None:
                 feats = self._compute_feats(self.frames[idx],self.all_species, self.filter_by)
                 
@@ -425,6 +424,7 @@ def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
     calculators: Union[rascaline.torch.calculators.CalculatorBase,List[rascaline.torch.calculators.CalculatorBase]],
     do_gradients: bool = False,
+    do_cell_gradients: bool = False,
     precompute: bool = False,
     lazy_fill_up: bool = True,
     transforms: List[torch.nn.Module] = None,
@@ -455,13 +455,14 @@ def create_rascaline_dataloader(
     """creates a rascaline dataloader
     """
     dataset = RascalineAtomisticDataset(
-        frames,
-        calculators,
-        do_gradients,
-        precompute,
-        lazy_fill_up,
-        transforms,
-        memory_save,
+        frames=frames,
+        calculators=calculators,
+        do_gradients=do_gradients,
+        do_cell_gradients=do_cell_gradients,
+        precompute=precompute,
+        lazy_fill_up=lazy_fill_up,
+        transforms=transforms,
+        memory_save=memory_save,
         energy_key=energy_key,
         forces_key=forces_key,
         stress_key=stress_key,
