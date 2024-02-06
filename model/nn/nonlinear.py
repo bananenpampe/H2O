@@ -1,6 +1,6 @@
 
 from .modules import metatensorLazyTorchApply
-from .mlp import MLP_mean
+from .mlp import MLP_mean, EnsembleMLP  
 import torch
 
 class metatensorMLPLazy(metatensorLazyTorchApply):
@@ -19,6 +19,32 @@ class metatensorMLPLazy(metatensorLazyTorchApply):
             """ Returns a predefined MLP
             """
             return MLP_mean(n_in=n_in,
+                            n_out=n_out,
+                            n_hidden=n_hidden,
+                            n_hidden_layers=n_hidden_layers,
+                            activation=activation,
+                            w_bias=w_bias,
+                            mve=mve)
+        
+        super().__init__(predifined_MLP_factory, n_out)
+
+
+class metatensorMLPLazyEnsemble(metatensorLazyTorchApply):
+    """ Wrapper class that sets up a predefined Ensemble MLP
+    that then gets applied block wise
+    """
+    
+    def __init__(self, n_out: int,
+                 n_hidden: int = 32,
+                 n_hidden_layers: int = 2,
+                 activation: torch.nn.Module = torch.nn.Tanh,
+                 w_bias=True,
+                 mve=False):
+        
+        def predifined_MLP_factory(n_in: int, n_out: int):
+            """ Returns a predefined MLP
+            """
+            return EnsembleMLP(n_in=n_in,
                             n_out=n_out,
                             n_hidden=n_hidden,
                             n_hidden_layers=n_hidden_layers,

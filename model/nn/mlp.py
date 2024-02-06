@@ -67,3 +67,46 @@ class MLP_mean(torch.nn.Module):
             mean = torch.stack((mean_out, var), dim=1)
         
         return mean
+
+
+class EnsembleMLP(torch.nn.Module):
+    """ Initializes an ensemble of MLPs with an arbitrary number of hidden layers and activation functions
+    overwrites the n_out keyword of shallow ensembles to the number of committee members
+    """
+    def __init__(self,
+                 n_in: int, 
+                 n_out: int,
+                 n_hidden: int = 32,
+                 n_hidden_layers: int = 2,
+                 activation: torch.nn.Module = torch.nn.SiLU,
+                 w_bias: bool = True,
+                 mve: bool = False) -> None:
+        
+        """
+        Args:
+            n_in (int): number of input features
+            n_out (int): number of output features
+            n_hidden (int): number of hidden neurons
+            n_hidden_layers (int): number of hidden layers
+            activation (torch.nn.module): activation function
+            n_ensemble (int): number of ensemble members
+        """
+        
+        super().__init__()
+
+        self.mve = mve
+
+
+
+        if self.mve:
+            assert n_out % 2 == 0, "n_out must be 2 for mve"
+            assert w_bias == False, "bias must be False for mve"
+            raise NotImplementedError("MVE not implemented yet")
+
+        self.ensemble = torch.nn.ModuleList([MLP_mean(n_in, 1, n_hidden, n_hidden_layers, activation, w_bias, mve) for _ in range(n_out)])
+    
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        
+        mean = torch.cat([model(x) for model in self.ensemble], dim=1)
+
+        return mean
