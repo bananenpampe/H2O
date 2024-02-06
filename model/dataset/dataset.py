@@ -61,6 +61,9 @@ import numpy as np
 from metatensor.torch import join
 from metatensor.torch.operations import sort
 
+# use jit compiled function
+join = torch.jit.script(metatensor.torch.join)
+
 class RascalineAtomisticDataset(torch.utils.data.Dataset):
     """ A dataset for general rascaline calculators
     """
@@ -424,6 +427,7 @@ def create_rascaline_dataloader(
     frames: Union[ase.Atoms,List[ase.Atoms]],
     calculators: Union[rascaline.torch.calculators.CalculatorBase,List[rascaline.torch.calculators.CalculatorBase]],
     do_gradients: bool = False,
+    do_cell_gradients: bool = False,
     precompute: bool = False,
     lazy_fill_up: bool = True,
     transforms: List[torch.nn.Module] = None,
@@ -457,6 +461,7 @@ def create_rascaline_dataloader(
         frames=frames,
         calculators=calculators,
         do_gradients=do_gradients,
+        do_cell_gradients=do_cell_gradients,
         precompute=precompute,
         lazy_fill_up=lazy_fill_up,
         transforms=transforms,
