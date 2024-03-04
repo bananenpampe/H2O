@@ -168,7 +168,7 @@ cython_debug/
 wandb.txt
 
 #ignore all pytorch lightning .ckpt
-*.ckpt
+#*.ckpt
 
 #all config files
 *.yaml
@@ -178,3 +178,6 @@ wandb/
 
 #all tfevents
 *tfevents*
+
+*.pt
+*.ckpt

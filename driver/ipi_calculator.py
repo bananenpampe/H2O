@@ -19,12 +19,13 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "train"))
 
 from nn.interaction import BPNNInteraction
+from nn.response import ForceRespone
 from nn.model import BPNNModel
-from rascaline_trainer_uncertainty import BPNNRascalineModule
+from rascaline_trainer import BPNNRascalineModule
 from transformer.composition import CompositionTransformer
 import torch
 import rascaline
-from nn.response import ForceUncertaintyRespone
+from nn.response import ForceRespone, PseudoForceUncertaintyRespone, ForceUncertaintyRespone
 from dataset.dataset import create_rascaline_dataloader, RascalineAtomisticDataset
 import ase.io
 from metatensor.torch import Labels
@@ -32,6 +33,7 @@ from torch.autograd import grad
 import rascaline.torch
 from rascaline.torch.utils import PowerSpectrum
 import rascaline.torch
+import json
 
 torch.set_default_dtype(torch.float64)
 
@@ -125,9 +127,11 @@ class PytorchLightningCalculator:
         feat = self.dataset._compute_feats(ex_frame, self.dataset.all_species)
 
         self.model = BPNNRascalineModule(\
+        energy_transformer=CompositionTransformer(multi_block=True),
         example_tensormap=feat,\
         model=BPNNModel(\
-        interaction=BPNNInteraction(n_out=1, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64)))
+        interaction=BPNNInteraction(n_out=64, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64),
+        response=ForceUncertaintyRespone()),)
                 
         print(self.model)
         print(self.model.state_dict().keys())
@@ -142,7 +146,7 @@ class PytorchLightningCalculator:
                                                                     requires_grad=False)
              
         self.model.energy_transformer.weights = checkpoint["energy_transformer.weights"]
-        #checkpoint.pop("energy_transformer.weights")
+        checkpoint.pop("energy_transformer.weights")
         self.model.load_state_dict(checkpoint)
         self.model.energy_transformer.is_fitted = True
         self.model.energy_transformer.unique_labels = Labels(["species_center"], values=torch.tensor(self.dataset.all_species).reshape(-1,1))
@@ -178,7 +182,15 @@ class PytorchLightningCalculator:
         energy = energy.detach().numpy()
         forces = forces.detach().numpy()
 
+
+        committee_e = self.model.model.get_energy(
+            feat_forward, [forward_frame]
+            ).block(0).values
+
+        composition_e = self.model.energy_transformer.get_composition_energy([forward_frame])
         
+        committee_e += composition_e
+        committee_e = committee_e.detach().numpy()
         #THis is for the virial:
         #"""
         #outputs = list(torch.ones_like(out.block(0).values))
@@ -197,10 +209,15 @@ class PytorchLightningCalculator:
 
         # write model preds to the extras:
         # make fake committee of models
+        """
         ncomm = 4
         committee = []
 
         for i in range(ncomm):
             committee.append( (energy.flatten()[0], forces.flatten(), virial.flatten()) )
+        """
+    
+        extras = {"committee_pot":committee_e.tolist()}
+        extras = json.dumps(extras)
 
-        return energy, forces, virial, committee
+        return energy, forces, virial, extras
