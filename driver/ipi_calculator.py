@@ -34,17 +34,18 @@ import rascaline.torch
 from rascaline.torch.utils import PowerSpectrum
 import rascaline.torch
 import json
+import numpy as np
 
 torch.set_default_dtype(torch.float64)
 
 class PytorchLightningCalculator:
 
     def __init__(self, checkpoint, initial_frame):
-
-        #uses initial frame to initialize model ?
-        # should be changed to get a fully pickeled model, imo
         
         self.atoms = ase.io.read(initial_frame, index="0")
+
+        self.atoms.info["potential"] = 0.0
+        self.atoms.arrays["force"] = np.ones_like(self.atoms.get_positions())
         
         checkpoint = torch.load(checkpoint)['state_dict']
 
@@ -80,39 +81,6 @@ class PytorchLightningCalculator:
         calc_rs = rascaline.torch.SoapRadialSpectrum(**hypers_rs)
         calc_ps = rascaline.torch.SoapPowerSpectrum(**hypers_ps)
 
-        """
-        hypers_sr_spex = {
-            "cutoff": 3.0,
-            "max_radial": 4,
-            "max_angular": 1,
-            "atomic_gaussian_width": 0.3,
-            "center_atom_weight": 1.0,
-            "radial_basis": {
-                "Gto": {},
-            },
-            "cutoff_function": {
-                "ShiftedCosine": {"width":0.25},
-            },
-        }
-
-        hypers_lr = {
-            "cutoff": 3.0,
-            "max_radial": 4,
-            "max_angular": 1,
-            "atomic_gaussian_width": 1.25,
-            "center_atom_weight": 1.,
-            "potential_exponent":1,
-            "radial_basis": {
-                "Gto": {},
-            },
-        }
-
-        calc_sr_spex = rascaline.torch.SphericalExpansion(**hypers_sr_spex)
-        calc_lr = rascaline.torch.LodeSphericalExpansion(**hypers_lr)
-
-        calc_lode = PowerSpectrum(calc_sr_spex,calc_lr)
-        """
-
         self.dataset = RascalineAtomisticDataset(self.atoms,
                                          energy_key="potential",
                                          forces_key="force",
@@ -130,7 +98,7 @@ class PytorchLightningCalculator:
         energy_transformer=CompositionTransformer(multi_block=True),
         example_tensormap=feat,\
         model=BPNNModel(\
-        interaction=BPNNInteraction(n_out=64, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64),
+        interaction=BPNNInteraction(n_out=5, n_hidden_layers=2, activation=torch.nn.SiLU, n_hidden=64),
         response=ForceUncertaintyRespone()),)
                 
         print(self.model)
@@ -160,64 +128,91 @@ class PytorchLightningCalculator:
         self.atoms.set_cell(cell_matrix)
 
         forward_frame = rascaline.torch.systems_to_torch(self.atoms,
-                                                         positions_requires_grad=True,)
-                                                         #cell_requires_grad=True)
+                                                         positions_requires_grad=True,
+                                                         cell_requires_grad=True)
         
         feat_forward = self.dataset._compute_feats(forward_frame,
                                                    self.dataset.all_species)
 
         out = self.model.calculate(feat_forward, [forward_frame])
         
-        # assumes constant number of molecules
-        # take the inital frame and update positions and cell
-        # wrap it as a pytorch, rascaline.torch system
-        # on the dataset use _compute_feats() to get the features
-        # call model.calculate() on the features
-        # for now we return "useless" virial
-        # should return energy, forces, virial
-
         energy = out.block(0).values
-        forces = -out.block(0).gradient("positions").values
+        force = -out.block(0).gradient("positions").values
 
-        energy = energy.detach().numpy()
-        forces = forces.detach().numpy()
+        outputs = list(torch.ones_like(out.block(0).values))
 
-
-        committee_e = self.model.model.get_energy(
-            feat_forward, [forward_frame]
-            ).block(0).values
-
-        composition_e = self.model.energy_transformer.get_composition_energy([forward_frame])
-        
-        committee_e += composition_e
-        committee_e = committee_e.detach().numpy()
-        #THis is for the virial:
-        #"""
-        #outputs = list(torch.ones_like(out.block(0).values))
-        """
         dEdc = grad(outputs=list(out.block(0).values),
                       inputs=[forward_frame.cell],
                       grad_outputs=outputs,
                       create_graph=True,
                       retain_graph=True)[0]
         
-        ##virial = -dEdc.detach().numpy().T @ cell_matrix
+        virial = -dEdc.detach().numpy().T @ cell_matrix
         virial = 0.5 * (virial + virial.T)
-        #"""
 
-        virial = cell_matrix * 0.0  
+        energy = energy.detach().numpy()
+        force = force.detach().numpy()
 
-        # write model preds to the extras:
-        # make fake committee of models
-        """
-        ncomm = 4
-        committee = []
+        committee_e = self.model.model.get_energy(
+            feat_forward, [forward_frame]
+            ).block(0).values
 
-        for i in range(ncomm):
-            committee.append( (energy.flatten()[0], forces.flatten(), virial.flatten()) )
-        """
-    
-        extras = {"committee_pot":committee_e.tolist()}
+        composition_e = self.model.energy_transformer.get_composition_energy([forward_frame])
+
+        forces = []
+
+        force_for_dyn = []
+        virials = []
+            
+        for e_i in committee_e.flatten():
+            
+            # Zero-out previous gradients if any
+            
+            if forward_frame.positions.grad is not None:
+                forward_frame.positions.grad.zero_()
+            
+            if forward_frame.cell.grad is not None:
+                forward_frame.cell.grad.zero_()
+
+            e_i.backward(retain_graph=True)
+
+            # Append the computed gradient to our list
+            f_np = -forward_frame.positions.grad.clone().numpy()
+
+            force_for_dyn.append(f_np)
+            forces.append(np.copy(force).flatten()) #f_np.flatten())            
+
+            v_np = -forward_frame.cell.grad.detach().numpy().T @ cell_matrix
+            v_np = 0.5 * (v_np + v_np.T)
+
+
+            virials.append(v_np.flatten()) 
+        
+        #stack and flatten forces
+        committee_e += composition_e
+        committee_e = committee_e.detach().numpy().reshape(-1,1)
+
+        
+        forces = np.stack(forces)
+        #sys.stdout.write(str(forces.shape)+"\n")
+        #shape forces: (N_ens, N_atoms*3)
+
+        virials = np.stack(virials)
+
+        force_for_dyn = np.mean(force_for_dyn,axis=0)
+        # shape -> (N_atoms, 3)
+
+        extras = {"committee_pot":committee_e.tolist(),
+                  "committee_force":forces.tolist(),
+                  "committee_virial":virials.tolist()}
+        
         extras = json.dumps(extras)
 
-        return energy, forces, virial, extras
+        return energy, force_for_dyn, virial, extras
+    
+"""
+#remove first and last [] of array __repr__
+e_str = np.array2string(committee_e, threshold=np.inf, max_line_width=np.inf)[1:-1]
+f_str = np.array2string(forces, precision=8, threshold=np.inf, max_line_width=np.inf)[1:-1]
+v_str = np.array2string(virials, precision=8, threshold=np.inf, max_line_width=np.inf)[1:-1]
+"""
