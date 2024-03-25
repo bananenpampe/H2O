@@ -44,7 +44,7 @@ class BPNNRascalineModule(pl.LightningModule):
         outputs = self(feats, systems)
         l = Labels(["energy"], values=torch.tensor([0]).reshape(-1,1))
         outputs = TensorMap(l,[outputs.block(0).copy()])
-        print(outputs.keys)
+        #print(outputs.keys)
         outputs = self.energy_transformer.inverse_transform(systems, outputs)
 
         return outputs
